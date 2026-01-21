@@ -4,6 +4,7 @@ This job fetches French legislation from the Légifrance API (PISTE).
 Requires PISTE OAuth credentials.
 """
 
+import contextlib
 import os
 import uuid
 from collections.abc import Generator
@@ -121,10 +122,8 @@ Same as PISTE_CLIENT_ID - copy the Client Secret from your application settings.
         date_text = result.get("dateTexte", "")
         doc_date = None
         if date_text:
-            try:
+            with contextlib.suppress(ValueError):
                 doc_date = date.fromisoformat(date_text[:10])
-            except ValueError:
-                pass
 
         return Document(
             id=str(uuid.uuid4()),
