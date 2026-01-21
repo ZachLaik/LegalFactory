@@ -1,25 +1,34 @@
 # Legal Data Factory
 
-Continuously bootstraps and updates EU legislation + case law, writing to a Neon Postgres database with comprehensive jurisdiction coverage tracking.
+**Scraper development and validation framework** for EU legislation + case law. This repo contains scraper code, jurisdiction configs, and test infrastructure. Scrapers run in **dry-run mode** (no database required) - a separate orchestration tool handles production execution and data storage.
+
+## Purpose
+
+This repo is for:
+- ✅ Developing and testing scrapers
+- ✅ Validating parser output against golden fixtures
+- ✅ CI/CD with auto-retry on transient failures
+- ✅ Jurisdiction coverage tracking via configs
+
+This repo does NOT:
+- ❌ Save data to a database (dry-run only)
+- ❌ Run production crawls (use a separate orchestration tool)
 
 ## Quick Start
 
 ```bash
+# Create virtual environment
+python3 -m venv .venv
+source .venv/bin/activate
+
 # Install dependencies
 pip install -e ".[dev]"
 
-# Copy and configure environment
-cp .env.example .env.local
-# Edit .env.local with your Neon database URL
-
-# Check configuration
-ldf doctor
-
-# Initialize database schema
-ldf init-db
-
 # View coverage status
 ldf status
+
+# Test a scraper (dry-run, no DB needed)
+ldf run eu/eurlex_legislation --limit 5 --dry-run
 ```
 
 ## Architecture
@@ -40,33 +49,29 @@ LegalDataFactory/
 │   └── ...
 ├── core/
 │   ├── models/            # Pydantic data models
-│   └── storage/           # Database layer (Neon Postgres)
+│   └── storage/           # Database layer (for production use)
 ├── cli/
 │   └── main.py            # CLI entrypoint (ldf command)
 ├── tests/
 │   ├── unit/              # Unit tests
 │   ├── fixtures/          # Golden fixtures for parser tests
-│   └── integration/       # Integration tests (gated)
+│   └── integration/       # Integration tests
 └── .github/
-    ├── workflows/         # CI/CD pipelines
-    └── ISSUE_TEMPLATE/    # Issue templates for task tracking
+    ├── workflows/         # CI with auto-retry
+    └── ISSUE_TEMPLATE/    # Issue templates
 ```
 
 ## CLI Commands
 
 ```bash
-ldf doctor          # Check secrets + database connection
-ldf status          # Show coverage status by jurisdiction
-ldf stats           # Show database statistics
-ldf init-db         # Initialize database schema
-ldf run <job>       # Run a specific job (e.g., eu/eurlex_legislation)
-ldf controller      # Start continuous crawling loop
-ldf create-issues   # Create GitHub issues from configs
+ldf status              # Show coverage status by jurisdiction
+ldf run <job> --dry-run # Test a scraper (no database)
+ldf doctor              # Check configuration
 ```
 
 ## Jurisdiction Coverage
 
-Each jurisdiction has a YAML configuration in `configs/jurisdictions/`:
+28 YAML configs in `configs/jurisdictions/` covering EU + 27 Member States:
 
 - **80/20 Plan**: What yields most value fast (supreme courts, consolidated law)
 - **Backlog**: Everything needed for completeness later
@@ -82,27 +87,21 @@ Each jurisdiction has a YAML configuration in `configs/jurisdictions/`:
 | Devolved | ES, IT, PT | Autonomous regions with legislative powers |
 | Unitary | FR, NL, PL, ... | Single national system |
 
-## Database Schema
+## CI/CD
 
-Single logical schema with columns for jurisdiction and doc_type:
+GitHub Actions runs on every push:
 
-- `documents`: Normalized metadata for all legal documents
-- `document_texts`: Content versions and extracted text
-- `runs`: Job execution tracking
-- `watermarks`: Crawl progress for incremental updates
+1. **Lint** - ruff + mypy
+2. **Unit Tests** - pytest
+3. **Config Validation** - JSON Schema
+4. **Scraper Tests** - dry-run with **auto-retry** (3 attempts)
 
-## GitHub Integration
-
-Task tracking via GitHub Issues:
-
-- Labels: `country:DE`, `type:scraper`, `priority:P0`, `blocked:credentials`
-- Issue templates: Inventory, Implement Job, Data Bug, Blocked
-- Project board: EU Coverage (by country, by type, by status)
+Scrapers are tested against real endpoints but don't save data. Transient failures (network issues, rate limits) trigger automatic retries.
 
 ## Development
 
 ```bash
-# Run tests
+# Run tests locally
 pytest tests/unit -v
 
 # Lint
@@ -111,17 +110,24 @@ ruff check .
 # Type check
 mypy cli core jobs
 
-# Run integration tests (requires approval)
-# Via GitHub Actions workflow_dispatch
+# Test a specific scraper
+ldf run eu/eurlex_legislation --limit 3 --dry-run
 ```
 
-## Environment Variables
+## Adding a New Scraper
 
-| Variable | Description | Required |
-|----------|-------------|----------|
-| `DATABASE_URL` | Neon Postgres connection string | Yes |
-| `GITHUB_TOKEN` | GitHub PAT for issue management | For issues |
-| `EURLEX_API_KEY` | EUR-Lex API key | Optional |
+1. Create `jobs/<iso>/<source>.py` extending `BaseJob`
+2. Add source to `configs/jurisdictions/<ISO>.yaml`
+3. Add golden fixtures to `tests/fixtures/<source>/`
+4. Add to CI matrix in `.github/workflows/ci.yml`
+
+## Production Execution
+
+This repo is **test-only**. For production:
+- Use a separate orchestration tool to run scrapers
+- That tool should import jobs from this repo
+- Configure DATABASE_URL in the orchestration environment
+- The orchestration tool handles scheduling, storage, and monitoring
 
 ## License
 
