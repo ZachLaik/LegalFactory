@@ -12,12 +12,10 @@ Usage:
 
 import argparse
 import csv
-import json
 import logging
 import time
 from datetime import datetime
 from pathlib import Path
-from urllib.parse import urlencode
 
 import requests
 

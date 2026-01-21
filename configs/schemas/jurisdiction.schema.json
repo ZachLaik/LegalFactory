@@ -246,7 +246,7 @@
         "level": { "type": "string" },
         "jurisdiction_scope": {
           "type": "string",
-          "enum": ["national", "regional", "local"]
+          "enum": ["national", "regional", "local", "supranational"]
         },
         "ecli_code": { "type": "string" }
       }
