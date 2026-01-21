@@ -381,7 +381,7 @@ def controller(
         time.sleep(interval)
 
 
-def _find_next_task(jurisdictions: dict) -> str | None:  # type: ignore[type-arg]
+def _find_next_task(jurisdictions: dict) -> str | None:
     """Find the next task to execute based on priority.
 
     Returns job_id of next task, or None if no tasks available.
