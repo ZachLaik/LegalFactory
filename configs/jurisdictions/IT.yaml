@@ -1,0 +1,239 @@
+# Italy (Italia) - Unitary Republic with Regional Autonomy
+
+jurisdiction:
+  iso_code: IT
+  name:
+    en: Italy
+    native: Italia
+  eu_member_since: "1958-01-01"  # Founding member
+  languages:
+    - it
+
+legal_system:
+  type: devolved
+  hierarchy:
+    levels:
+      - name: National (Stato)
+        code: state
+      - name: Regions (Regioni)
+        code: region
+        subdivisions:
+          - name: Special Statute Regions
+            code: special
+            notes: |
+              Aosta Valley, Friuli-Venezia Giulia, Sardinia,
+              Sicily, Trentino-Alto Adige/Südtirol
+          - name: Ordinary Regions
+            code: ordinary
+            notes: 15 ordinary regions with legislative powers
+
+  court_structure:
+    constitutional:
+      - name:
+          en: Constitutional Court
+          native: Corte costituzionale
+        code: CC
+        ecli_code: IT:COST
+        level: constitutional
+        jurisdiction_scope: national
+
+    supreme:
+      - name:
+          en: Supreme Court of Cassation
+          native: Corte suprema di cassazione
+        code: CASS
+        ecli_code: IT:CASS
+        level: supreme
+        jurisdiction_scope: national
+      - name:
+          en: Council of State
+          native: Consiglio di Stato
+        code: CDS
+        ecli_code: IT:CDS
+        level: supreme
+        jurisdiction_scope: national
+        notes: Supreme administrative court
+
+    appellate:
+      - name:
+          en: Courts of Appeal
+          native: Corti d'appello
+        code: APP
+        level: appellate
+        jurisdiction_scope: regional
+
+sources:
+  legislation:
+    - name: Normattiva
+      url: https://www.normattiva.it
+      type: consolidated_legislation
+      coverage:
+        temporal:
+          from: "1861"
+          to: present
+        content:
+          - All national legislation
+          - Consolidated texts (multivigente)
+      formats:
+        - html
+        - pdf
+        - xml
+      access: open
+      priority: p0
+      job_id: it/normattiva
+      notes: |
+        Official consolidated legislation portal.
+        Excellent historical coverage.
+        Multivigente shows law at any point in time.
+
+    - name: Gazzetta Ufficiale
+      url: https://www.gazzettaufficiale.it
+      type: official_gazette
+      coverage:
+        temporal:
+          from: "1860"
+          to: present
+      formats:
+        - pdf
+        - html
+      access: open
+      priority: p1
+      job_id: it/gazzetta
+
+    - name: N-Lex Italy
+      url: https://n-lex.europa.eu/n-lex/pays.html?lang=en&pays=IT
+      type: n_lex_gateway
+      access: open
+      priority: p2
+
+  case_law:
+    - name: Italgiure
+      url: https://www.italgiure.giustizia.it
+      type: case_law_portal
+      coverage:
+        temporal:
+          from: varies
+          to: present
+        content:
+          - Cassation Court
+          - Courts of Appeal
+          - Some first instance
+      formats:
+        - html
+        - pdf
+      access: registration
+      priority: p0
+      job_id: it/italgiure
+      notes: Free registration required
+
+    - name: Constitutional Court
+      url: https://www.cortecostituzionale.it
+      type: court_database
+      coverage:
+        temporal:
+          from: "1956"
+          to: present
+      formats:
+        - html
+        - pdf
+      access: open
+      priority: p0
+      job_id: it/cortecostituzionale
+
+    - name: Council of State
+      url: https://www.giustizia-amministrativa.it
+      type: court_database
+      coverage:
+        temporal:
+          from: varies
+          to: present
+      formats:
+        - html
+      access: open
+      priority: p0
+      job_id: it/giustizia_amministrativa
+
+    - name: ECLI Search - Italy
+      url: https://e-justice.europa.eu/content_ecli_search_engine-430-it-en.do
+      type: ecli_portal
+      access: open
+      priority: p1
+
+identifiers:
+  legislation:
+    primary_scheme: GU Reference
+    patterns:
+      - name: Gazzetta Ufficiale
+        regex: "^GU( Serie Generale)?( n\\.)?[0-9]+ del [0-9]{2}-[0-9]{2}-[0-9]{4}$"
+        example: "GU Serie Generale n.123 del 01-06-2020"
+      - name: Law Number
+        regex: "^(Legge|L\\.) [0-9]+/[0-9]{4}$"
+        example: "Legge 241/1990"
+      - name: URN (Uniform Resource Name)
+        regex: "^urn:nir:stato:legge:[0-9]{4}(-[0-9]{2}){2};[0-9]+$"
+        example: "urn:nir:stato:legge:1990-08-07;241"
+
+  case_law:
+    ecli_support: true
+    ecli_country_code: IT
+    national_schemes:
+      - name: ECLI
+        pattern: "ECLI:IT:[A-Z]+:[0-9]{4}:[0-9]+"
+        example: "ECLI:IT:CASS:2020:12345CIV"
+      - name: Sentenza Number
+        pattern: "^(Sent\\.|Sentenza) n\\.? [0-9]+/[0-9]{4}$"
+        example: "Sentenza n. 100/2020"
+
+coverage_plan:
+  p80_legislation:
+    strategy: Normattiva is comprehensive, use for all national legislation
+    targets:
+      - source_ref: Normattiva
+        scope: All national laws (consolidated)
+        estimated_docs: 150000
+        priority: p0
+        status: planned
+
+  p80_case_law:
+    strategy: Focus on supreme courts first
+    targets:
+      - source_ref: Constitutional Court
+        scope: All decisions
+        estimated_docs: 20000
+        priority: p0
+        status: planned
+      - source_ref: Italgiure
+        scope: Cassation decisions
+        estimated_docs: 200000
+        priority: p0
+        status: planned
+        blockers:
+          - requires_registration
+
+  backlog:
+    - id: it-regional
+      description: Regional legislation (20 regions)
+      type: legislation
+      priority: p2
+      status: planned
+    - id: it-lower-courts
+      description: First instance court decisions
+      type: case_law
+      priority: p2
+      status: planned
+
+access:
+  model: partial
+  rate_limits:
+    requests_per_second: 1
+  api_available: false
+  bulk_download: false
+  notes: |
+    Normattiva is excellent for legislation.
+    Italgiure requires free registration for full access.
+
+metadata:
+  last_updated: "2025-01-21"
+  maintainer: LegalDataFactory
+  status: active
+  notes: Large corpus - Italy has extensive historical legislation

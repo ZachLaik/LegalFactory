@@ -1,0 +1,90 @@
+name: Inventory Task
+description: Create or update jurisdiction configuration file
+title: "[INVENTORY] <ISO>: <description>"
+labels: ["type:inventory"]
+body:
+  - type: dropdown
+    id: country
+    attributes:
+      label: Country/Jurisdiction
+      description: Select the jurisdiction this task relates to
+      options:
+        - EU (European Union)
+        - AT (Austria)
+        - BE (Belgium)
+        - BG (Bulgaria)
+        - CY (Cyprus)
+        - CZ (Czech Republic)
+        - DE (Germany)
+        - DK (Denmark)
+        - EE (Estonia)
+        - ES (Spain)
+        - FI (Finland)
+        - FR (France)
+        - GR (Greece)
+        - HR (Croatia)
+        - HU (Hungary)
+        - IE (Ireland)
+        - IT (Italy)
+        - LT (Lithuania)
+        - LU (Luxembourg)
+        - LV (Latvia)
+        - MT (Malta)
+        - NL (Netherlands)
+        - PL (Poland)
+        - PT (Portugal)
+        - RO (Romania)
+        - SE (Sweden)
+        - SI (Slovenia)
+        - SK (Slovakia)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: doc_type
+    attributes:
+      label: Document Type
+      description: What type of content does this task cover?
+      options:
+        - Legislation
+        - Case Law
+        - Both
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Task Description
+      description: Describe the inventory work needed
+      placeholder: |
+        - Research available sources
+        - Document API access
+        - Map identifier schemes
+        - Define 80/20 coverage plan
+    validations:
+      required: true
+
+  - type: textarea
+    id: sources
+    attributes:
+      label: Sources to Investigate
+      description: List the data sources to research
+      placeholder: |
+        - Official gazette URL
+        - Consolidated law portal
+        - Court database
+        - ECLI portal coverage
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance Criteria
+      description: What needs to be completed for this task to be done?
+      value: |
+        - [ ] configs/jurisdictions/<ISO>.yaml created/updated
+        - [ ] All sources documented with URLs
+        - [ ] Access model documented
+        - [ ] 80/20 plan defined
+        - [ ] Backlog items listed
+        - [ ] Identifier patterns documented

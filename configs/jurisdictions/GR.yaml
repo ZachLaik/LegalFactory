@@ -1,0 +1,202 @@
+# Greece (Ελλάδα) - Unitary Republic
+
+jurisdiction:
+  iso_code: GR
+  name:
+    en: Greece
+    native: Ελλάδα
+  eu_member_since: "1981-01-01"
+  languages:
+    - el
+
+legal_system:
+  type: unitary
+  hierarchy:
+    levels:
+      - name: National
+        code: national
+
+  court_structure:
+    constitutional:
+      - name:
+          en: Special Supreme Court
+          native: Ανώτατο Ειδικό Δικαστήριο
+        code: AED
+        level: constitutional
+        jurisdiction_scope: national
+        notes: Handles constitutional issues, electoral disputes
+
+    supreme:
+      - name:
+          en: Supreme Civil and Criminal Court (Areios Pagos)
+          native: Άρειος Πάγος
+        code: AP
+        ecli_code: GR:AP
+        level: supreme
+        jurisdiction_scope: national
+      - name:
+          en: Council of State
+          native: Συμβούλιο της Επικρατείας
+        code: STE
+        ecli_code: GR:STE
+        level: supreme
+        jurisdiction_scope: national
+        notes: Supreme administrative court
+      - name:
+          en: Court of Audit
+          native: Ελεγκτικό Συνέδριο
+        code: ES
+        ecli_code: GR:ES
+        level: supreme
+        jurisdiction_scope: national
+
+    appellate:
+      - name:
+          en: Courts of Appeal
+          native: Εφετεία
+        code: EF
+        level: appellate
+        jurisdiction_scope: regional
+
+sources:
+  legislation:
+    - name: National Printing Office (ΕΤ)
+      url: https://www.et.gr
+      type: official_gazette
+      coverage:
+        temporal:
+          from: varies
+          to: present
+        content:
+          - Government Gazette
+          - Laws, decrees, regulations
+      formats:
+        - pdf
+      access: open
+      priority: p0
+      job_id: gr/et
+
+    - name: Kodiko.gr
+      url: https://www.kodiko.gr
+      type: consolidated_legislation
+      coverage:
+        temporal:
+          from: varies
+          to: present
+        content:
+          - Consolidated Greek codes
+      formats:
+        - html
+      access: open
+      priority: p0
+      job_id: gr/kodiko
+
+    - name: N-Lex Greece
+      url: https://n-lex.europa.eu/n-lex/pays.html?lang=en&pays=EL
+      type: n_lex_gateway
+      access: open
+      priority: p2
+
+  case_law:
+    - name: Areios Pagos (Supreme Court)
+      url: https://www.areiospagos.gr
+      type: court_database
+      coverage:
+        temporal:
+          from: varies
+          to: present
+      formats:
+        - html
+        - pdf
+      access: open
+      priority: p0
+      job_id: gr/areiospagos
+
+    - name: Council of State
+      url: https://www.ste.gr
+      type: court_database
+      coverage:
+        temporal:
+          from: varies
+          to: present
+      formats:
+        - html
+      access: open
+      priority: p0
+      job_id: gr/ste
+
+    - name: ECLI Search - Greece
+      url: https://e-justice.europa.eu/content_ecli_search_engine-430-el-en.do
+      type: ecli_portal
+      access: open
+      priority: p1
+
+identifiers:
+  legislation:
+    primary_scheme: FEK Reference
+    patterns:
+      - name: Government Gazette (FEK)
+        regex: "^ΦΕΚ [Α-Ω]'? [0-9]+/[0-9]{4}$"
+        example: "ΦΕΚ Α' 123/2020"
+
+  case_law:
+    ecli_support: true
+    ecli_country_code: GR
+    national_schemes:
+      - name: Decision Number
+        pattern: "[0-9]+/[0-9]{4}"
+        example: "1234/2020"
+
+coverage_plan:
+  p80_legislation:
+    strategy: Use official gazette and Kodiko for consolidated texts
+    targets:
+      - source_ref: Kodiko.gr
+        scope: Major codes
+        estimated_docs: 50
+        priority: p0
+        status: planned
+      - source_ref: National Printing Office
+        scope: Recent legislation
+        estimated_docs: 10000
+        priority: p0
+        status: planned
+
+  p80_case_law:
+    strategy: Focus on supreme courts
+    targets:
+      - source_ref: Areios Pagos
+        scope: Published decisions
+        estimated_docs: 20000
+        priority: p0
+        status: planned
+      - source_ref: Council of State
+        scope: Published decisions
+        estimated_docs: 30000
+        priority: p0
+        status: planned
+
+  backlog:
+    - id: gr-historical
+      description: Historical legislation
+      type: legislation
+      priority: p2
+      status: planned
+    - id: gr-lower-courts
+      description: Courts of appeal decisions
+      type: case_law
+      priority: p2
+      status: planned
+
+access:
+  model: open
+  rate_limits:
+    requests_per_second: 1
+  api_available: false
+  bulk_download: false
+  notes: Greek script requires encoding handling
+
+metadata:
+  last_updated: "2025-01-21"
+  maintainer: LegalDataFactory
+  status: active

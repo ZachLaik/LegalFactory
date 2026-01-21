@@ -1,0 +1,199 @@
+# Austria (Österreich) - Federal Republic
+# Federal system with 9 Länder
+
+jurisdiction:
+  iso_code: AT
+  name:
+    en: Austria
+    native: Österreich
+  eu_member_since: "1995-01-01"
+  languages:
+    - de
+
+legal_system:
+  type: federal
+  hierarchy:
+    levels:
+      - name: Federal (Bund)
+        code: bund
+      - name: State (Land)
+        code: land
+        subdivisions:
+          - name: Burgenland
+            code: B
+          - name: Carinthia (Kärnten)
+            code: K
+          - name: Lower Austria (Niederösterreich)
+            code: N
+          - name: Upper Austria (Oberösterreich)
+            code: O
+          - name: Salzburg
+            code: S
+          - name: Styria (Steiermark)
+            code: ST
+          - name: Tyrol (Tirol)
+            code: T
+          - name: Vorarlberg
+            code: V
+          - name: Vienna (Wien)
+            code: W
+
+  court_structure:
+    constitutional:
+      - name:
+          en: Constitutional Court
+          native: Verfassungsgerichtshof
+        code: VfGH
+        ecli_code: AT:VfGH
+        level: constitutional
+        jurisdiction_scope: national
+
+    supreme:
+      - name:
+          en: Supreme Court
+          native: Oberster Gerichtshof
+        code: OGH
+        ecli_code: AT:OGH
+        level: supreme
+        jurisdiction_scope: national
+      - name:
+          en: Supreme Administrative Court
+          native: Verwaltungsgerichtshof
+        code: VwGH
+        ecli_code: AT:VwGH
+        level: supreme
+        jurisdiction_scope: national
+
+    appellate:
+      - name:
+          en: Higher Regional Courts
+          native: Oberlandesgerichte
+        code: OLG
+        level: appellate
+        jurisdiction_scope: regional
+
+    administrative:
+      - name:
+          en: Federal Administrative Court
+          native: Bundesverwaltungsgericht
+        code: BVwG
+        ecli_code: AT:BVwG
+        level: appellate
+        jurisdiction_scope: national
+
+sources:
+  legislation:
+    - name: RIS (Rechtsinformationssystem)
+      url: https://www.ris.bka.gv.at
+      type: consolidated_legislation
+      coverage:
+        temporal:
+          from: "1848"
+          to: present
+        content:
+          - Federal consolidated law
+          - State law (all 9 Länder)
+          - Historical law
+      formats:
+        - html
+        - pdf
+        - xml
+      access: open
+      priority: p0
+      job_id: at/ris
+      notes: |
+        Excellent unified portal covering federal and all state law.
+        One of the best legal databases in EU.
+        API available.
+
+    - name: N-Lex Austria
+      url: https://n-lex.europa.eu/n-lex/pays.html?lang=en&pays=AT
+      type: n_lex_gateway
+      access: open
+      priority: p2
+
+  case_law:
+    - name: RIS Judikatur
+      url: https://www.ris.bka.gv.at/Judikatur/
+      type: case_law_portal
+      coverage:
+        temporal:
+          from: varies
+          to: present
+        content:
+          - VfGH decisions
+          - OGH decisions
+          - VwGH decisions
+          - BVwG decisions
+      formats:
+        - html
+        - pdf
+      access: open
+      priority: p0
+      job_id: at/ris_judikatur
+
+    - name: ECLI Search - Austria
+      url: https://e-justice.europa.eu/content_ecli_search_engine-430-at-en.do
+      type: ecli_portal
+      access: open
+      priority: p1
+
+identifiers:
+  legislation:
+    primary_scheme: BGBl
+    patterns:
+      - name: BGBl Number
+        regex: "^BGBl\\.? (I|II|III) Nr\\.? [0-9]+/[0-9]{4}$"
+        example: "BGBl. I Nr. 111/2010"
+
+  case_law:
+    ecli_support: true
+    ecli_country_code: AT
+    national_schemes:
+      - name: ECLI
+        pattern: "ECLI:AT:[A-Z]+:[0-9]{4}:[A-Z0-9.]+"
+        example: "ECLI:AT:OGH0002:2020:0010OB00001.20A.0115.000"
+
+coverage_plan:
+  p80_legislation:
+    strategy: RIS provides unified access to federal and state law
+    targets:
+      - source_ref: RIS
+        scope: Federal consolidated law
+        estimated_docs: 5000
+        priority: p0
+        status: planned
+
+  p80_case_law:
+    strategy: Focus on supreme courts via RIS
+    targets:
+      - source_ref: RIS Judikatur
+        scope: Supreme courts (VfGH, OGH, VwGH)
+        estimated_docs: 50000
+        priority: p0
+        status: planned
+
+  backlog:
+    - id: at-state-law
+      description: Complete state law coverage
+      type: legislation
+      priority: p1
+      status: planned
+    - id: at-lower-courts
+      description: Lower court decisions
+      type: case_law
+      priority: p2
+      status: planned
+
+access:
+  model: open
+  rate_limits:
+    requests_per_second: 2
+  api_available: true
+  bulk_download: false
+  notes: RIS is very well organized with API access
+
+metadata:
+  last_updated: "2025-01-21"
+  maintainer: LegalDataFactory
+  status: active

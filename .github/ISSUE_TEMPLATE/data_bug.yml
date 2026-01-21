@@ -1,0 +1,89 @@
+name: Data Bug Report
+description: Report incorrect or missing data
+title: "[DATA] <ISO>/<source>: <description>"
+labels: ["type:parser", "bug"]
+body:
+  - type: dropdown
+    id: country
+    attributes:
+      label: Country/Jurisdiction
+      options:
+        - EU (European Union)
+        - AT (Austria)
+        - BE (Belgium)
+        - BG (Bulgaria)
+        - CY (Cyprus)
+        - CZ (Czech Republic)
+        - DE (Germany)
+        - DK (Denmark)
+        - EE (Estonia)
+        - ES (Spain)
+        - FI (Finland)
+        - FR (France)
+        - GR (Greece)
+        - HR (Croatia)
+        - HU (Hungary)
+        - IE (Ireland)
+        - IT (Italy)
+        - LT (Lithuania)
+        - LU (Luxembourg)
+        - LV (Latvia)
+        - MT (Malta)
+        - NL (Netherlands)
+        - PL (Poland)
+        - PT (Portugal)
+        - RO (Romania)
+        - SE (Sweden)
+        - SI (Slovenia)
+        - SK (Slovakia)
+    validations:
+      required: true
+
+  - type: input
+    id: source
+    attributes:
+      label: Data Source
+      placeholder: "e.g., eurlex_legislation"
+    validations:
+      required: true
+
+  - type: input
+    id: document_id
+    attributes:
+      label: Document ID
+      description: The identifier of the affected document
+      placeholder: "e.g., CELEX:32016R0679, ECLI:EU:C:2014:317"
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Data
+      description: What the correct data should be
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual Data
+      description: What was extracted/stored
+    validations:
+      required: true
+
+  - type: textarea
+    id: source_url
+    attributes:
+      label: Source URL
+      description: Link to the original document
+
+  - type: textarea
+    id: fix_instructions
+    attributes:
+      label: Fix Instructions
+      value: |
+        1. Add failing fixture to tests/fixtures/<source>/
+        2. Update parser to handle this case
+        3. Verify fixture test passes
+        4. Re-crawl affected documents

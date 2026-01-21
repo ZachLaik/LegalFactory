@@ -1,0 +1,252 @@
+# Spain (España) - Devolved Unitary State
+# Autonomous communities with legislative powers
+
+jurisdiction:
+  iso_code: ES
+  name:
+    en: Spain
+    native: España
+  eu_member_since: "1986-01-01"
+  languages:
+    - es  # Spanish (Castilian)
+    - ca  # Catalan (official in Catalonia, Balearic Islands, Valencia)
+    - gl  # Galician (official in Galicia)
+    - eu  # Basque (official in Basque Country, Navarre)
+
+legal_system:
+  type: devolved
+  hierarchy:
+    levels:
+      - name: National (Estado)
+        code: estado
+      - name: Autonomous Communities (Comunidades Autónomas)
+        code: ccaa
+        subdivisions:
+          - name: Andalusia
+            code: AN
+          - name: Aragon
+            code: AR
+          - name: Asturias
+            code: AS
+          - name: Balearic Islands
+            code: IB
+          - name: Basque Country
+            code: PV
+          - name: Canary Islands
+            code: CN
+          - name: Cantabria
+            code: CB
+          - name: Castile and León
+            code: CL
+          - name: Castile-La Mancha
+            code: CM
+          - name: Catalonia
+            code: CT
+          - name: Extremadura
+            code: EX
+          - name: Galicia
+            code: GA
+          - name: La Rioja
+            code: RI
+          - name: Madrid
+            code: MD
+          - name: Murcia
+            code: MC
+          - name: Navarre
+            code: NC
+          - name: Valencia
+            code: VC
+
+  court_structure:
+    constitutional:
+      - name:
+          en: Constitutional Court
+          native: Tribunal Constitucional
+        code: TC
+        ecli_code: ES:TC
+        level: constitutional
+        jurisdiction_scope: national
+
+    supreme:
+      - name:
+          en: Supreme Court
+          native: Tribunal Supremo
+        code: TS
+        ecli_code: ES:TS
+        level: supreme
+        jurisdiction_scope: national
+
+    appellate:
+      - name:
+          en: High Courts of Justice
+          native: Tribunales Superiores de Justicia
+        code: TSJ
+        level: appellate
+        jurisdiction_scope: regional
+        notes: One per autonomous community
+
+    specialized:
+      - name:
+          en: National Court
+          native: Audiencia Nacional
+        code: AN
+        ecli_code: ES:AN
+        level: specialized
+        jurisdiction_scope: national
+        notes: Handles terrorism, organized crime, economic crimes
+
+sources:
+  legislation:
+    - name: BOE (Boletín Oficial del Estado)
+      url: https://www.boe.es
+      type: official_gazette
+      coverage:
+        temporal:
+          from: "1661"
+          to: present
+        content:
+          - National legislation
+          - Autonomous community legislation (CCAA)
+          - Consolidated texts
+      formats:
+        - html
+        - pdf
+        - xml
+      access: open
+      priority: p0
+      job_id: es/boe
+      notes: |
+        Excellent official database.
+        API available.
+        Consolidated legislation section.
+
+    - name: N-Lex Spain
+      url: https://n-lex.europa.eu/n-lex/pays.html?lang=en&pays=ES
+      type: n_lex_gateway
+      access: open
+      priority: p2
+
+  case_law:
+    - name: CENDOJ (Judicial Documentation Center)
+      url: https://www.poderjudicial.es/search/indexAN.jsp
+      type: case_law_portal
+      coverage:
+        temporal:
+          from: varies
+          to: present
+        content:
+          - All court levels
+          - Constitutional Court
+          - Supreme Court
+          - Audiencia Nacional
+      formats:
+        - html
+        - pdf
+      access: open
+      priority: p0
+      job_id: es/cendoj
+
+    - name: Constitutional Court
+      url: https://hj.tribunalconstitucional.es
+      type: court_database
+      coverage:
+        temporal:
+          from: "1980"
+          to: present
+      formats:
+        - html
+        - pdf
+      access: open
+      priority: p0
+      job_id: es/tc
+
+    - name: ECLI Search - Spain
+      url: https://e-justice.europa.eu/content_ecli_search_engine-430-es-en.do
+      type: ecli_portal
+      access: open
+      priority: p1
+
+identifiers:
+  legislation:
+    primary_scheme: BOE Reference
+    patterns:
+      - name: BOE Reference
+        regex: "^BOE-[A-Z]-[0-9]{4}-[0-9]+$"
+        example: "BOE-A-2020-1234"
+      - name: Law Number
+        regex: "^Ley [0-9]+/[0-9]{4}"
+        example: "Ley 39/2015"
+
+  case_law:
+    ecli_support: true
+    ecli_country_code: ES
+    national_schemes:
+      - name: ECLI
+        pattern: "ECLI:ES:[A-Z]+:[0-9]{4}:[0-9]+"
+        example: "ECLI:ES:TS:2020:1234"
+      - name: ROJ (Repertorio Oficial de Jurisprudencia)
+        pattern: "^(STS|STC|SAN) [0-9]+/[0-9]{4}$"
+        example: "STS 1234/2020"
+
+coverage_plan:
+  p80_legislation:
+    strategy: BOE is comprehensive for national and CCAA legislation
+    targets:
+      - source_ref: BOE
+        scope: National consolidated legislation
+        estimated_docs: 20000
+        priority: p0
+        status: planned
+      - source_ref: BOE
+        scope: Major autonomous community laws
+        estimated_docs: 15000
+        priority: p1
+        status: planned
+
+  p80_case_law:
+    strategy: CENDOJ provides unified access to all courts
+    targets:
+      - source_ref: Constitutional Court
+        scope: All decisions
+        estimated_docs: 15000
+        priority: p0
+        status: planned
+      - source_ref: CENDOJ
+        scope: Supreme Court decisions
+        estimated_docs: 100000
+        priority: p0
+        status: planned
+
+  backlog:
+    - id: es-ccaa-specific
+      description: Individual CCAA official gazettes
+      type: legislation
+      priority: p2
+      status: planned
+    - id: es-historical
+      description: Historical legislation (pre-constitution)
+      type: legislation
+      priority: p2
+      status: planned
+    - id: es-tsj
+      description: Complete TSJ coverage per CCAA
+      type: case_law
+      priority: p2
+      status: planned
+
+access:
+  model: open
+  rate_limits:
+    requests_per_second: 2
+  api_available: true
+  bulk_download: true
+  notes: |
+    BOE has excellent API and bulk download options.
+    CENDOJ provides comprehensive case law access.
+    Multiple languages in some regions.
+
+metadata:
+  last_updated: "2025-01-21"
+  maintainer: LegalDataFactory
+  status: active
+  notes: Devolved structure adds complexity but BOE centralizes access

@@ -1,0 +1,509 @@
+# Germany (Deutschland) - Federal Republic
+# Complex federal system with 16 Länder
+
+jurisdiction:
+  iso_code: DE
+  name:
+    en: Germany
+    native: Deutschland
+  eu_member_since: "1958-01-01"  # Founding member (as West Germany)
+  languages:
+    - de
+
+legal_system:
+  type: federal
+  hierarchy:
+    levels:
+      - name: Federal (Bund)
+        code: bund
+        description: Federal legislation and federal courts
+      - name: State (Land)
+        code: land
+        subdivisions:
+          - name: Baden-Württemberg
+            code: BW
+          - name: Bavaria (Bayern)
+            code: BY
+          - name: Berlin
+            code: BE
+          - name: Brandenburg
+            code: BB
+          - name: Bremen
+            code: HB
+          - name: Hamburg
+            code: HH
+          - name: Hesse (Hessen)
+            code: HE
+          - name: Lower Saxony (Niedersachsen)
+            code: NI
+          - name: Mecklenburg-Vorpommern
+            code: MV
+          - name: North Rhine-Westphalia (Nordrhein-Westfalen)
+            code: NW
+          - name: Rhineland-Palatinate (Rheinland-Pfalz)
+            code: RP
+          - name: Saarland
+            code: SL
+          - name: Saxony (Sachsen)
+            code: SN
+          - name: Saxony-Anhalt (Sachsen-Anhalt)
+            code: ST
+          - name: Schleswig-Holstein
+            code: SH
+          - name: Thuringia (Thüringen)
+            code: TH
+
+  court_structure:
+    constitutional:
+      - name:
+          en: Federal Constitutional Court
+          native: Bundesverfassungsgericht
+        code: BVerfG
+        ecli_code: DE:BVerfG
+        level: constitutional
+        jurisdiction_scope: national
+      # Each Land also has a constitutional court
+      - name:
+          en: State Constitutional Courts
+          native: Landesverfassungsgerichte
+        code: LVerfG
+        level: constitutional
+        jurisdiction_scope: regional
+        notes: 16 separate courts, one per Land
+
+    supreme:
+      # "Ordinary" jurisdiction
+      - name:
+          en: Federal Court of Justice
+          native: Bundesgerichtshof
+        code: BGH
+        ecli_code: DE:BGH
+        level: supreme
+        jurisdiction_scope: national
+        notes: Supreme court for civil and criminal matters
+
+    appellate:
+      - name:
+          en: Higher Regional Courts
+          native: Oberlandesgerichte
+        code: OLG
+        ecli_code: DE:OLG*
+        level: appellate
+        jurisdiction_scope: regional
+        notes: 24 OLGs across Germany
+
+    administrative:
+      - name:
+          en: Federal Administrative Court
+          native: Bundesverwaltungsgericht
+        code: BVerwG
+        ecli_code: DE:BVerwG
+        level: supreme
+        jurisdiction_scope: national
+      - name:
+          en: Federal Finance Court
+          native: Bundesfinanzhof
+        code: BFH
+        ecli_code: DE:BFH
+        level: supreme
+        jurisdiction_scope: national
+      - name:
+          en: Federal Labour Court
+          native: Bundesarbeitsgericht
+        code: BAG
+        ecli_code: DE:BAG
+        level: supreme
+        jurisdiction_scope: national
+      - name:
+          en: Federal Social Court
+          native: Bundessozialgericht
+        code: BSG
+        ecli_code: DE:BSG
+        level: supreme
+        jurisdiction_scope: national
+
+    specialized:
+      - name:
+          en: Federal Patent Court
+          native: Bundespatentgericht
+        code: BPatG
+        ecli_code: DE:BPatG
+        level: specialized
+        jurisdiction_scope: national
+
+sources:
+  legislation:
+    - name: Gesetze im Internet
+      url: https://www.gesetze-im-internet.de
+      type: consolidated_legislation
+      coverage:
+        temporal:
+          from: current
+          to: present
+          notes: Consolidated federal law currently in force
+        content:
+          - Federal laws (Bundesgesetze)
+          - Federal ordinances (Rechtsverordnungen)
+      formats:
+        - html
+        - pdf
+        - xml
+      access: open
+      priority: p0
+      job_id: de/gesetze_im_internet
+      notes: |
+        Official BMJ portal for consolidated federal law.
+        XML export available for most laws.
+        No historical versions - only current consolidated text.
+
+    - name: BGBl (Federal Law Gazette)
+      url: https://www.bgbl.de
+      type: official_gazette
+      coverage:
+        temporal:
+          from: "1949"
+          to: present
+          notes: Part I (laws), Part II (international treaties)
+        content:
+          - Original law texts as enacted
+          - Amendments
+          - Treaties
+      formats:
+        - pdf
+      access: registration
+      priority: p1
+      job_id: de/bgbl
+      notes: |
+        Authoritative source for enacted text.
+        Free registration required for full access.
+        Bürgerzugang (citizen access) provides free viewing.
+
+    - name: N-Lex Germany Portal
+      url: https://n-lex.europa.eu/n-lex/pays.html?lang=en&pays=DE
+      type: n_lex_gateway
+      coverage:
+        temporal:
+          from: varies
+          to: present
+        content:
+          - Links to German legal databases
+      formats:
+        - html
+      access: open
+      priority: p2
+      notes: Gateway to German sources, not primary crawler target
+
+    - name: Landesrecht (State Law Portals)
+      url: various
+      type: legislation_portal
+      coverage:
+        temporal:
+          from: varies
+          to: present
+        content:
+          - State constitutions
+          - State laws
+          - State ordinances
+      formats:
+        - html
+        - pdf
+      access: open
+      priority: p2
+      notes: |
+        Each Land has its own legal database:
+        - BW: landesrecht-bw.de
+        - BY: gesetze-bayern.de
+        - BE: gesetze.berlin.de
+        - BB: bravors.brandenburg.de
+        - HB: transparenz.bremen.de
+        - HH: landesrecht-hamburg.de
+        - HE: rv.hessenrecht.hessen.de
+        - MV: landesrecht-mv.de
+        - NI: voris.niedersachsen.de
+        - NW: recht.nrw.de
+        - RP: landesrecht.rlp.de
+        - SL: sl.juris.de
+        - SN: revosax.sachsen.de
+        - ST: landesrecht.sachsen-anhalt.de
+        - SH: gesetze-rechtsprechung.sh.juris.de
+        - TH: landesrecht.thueringen.de
+
+  case_law:
+    - name: Rechtsprechung im Internet
+      url: https://www.rechtsprechung-im-internet.de
+      type: case_law_portal
+      coverage:
+        temporal:
+          from: "2010"
+          to: present
+          notes: Selected decisions from federal courts
+        content:
+          - BVerfG decisions
+          - BGH decisions
+          - BVerwG decisions
+          - Other federal court decisions
+      formats:
+        - html
+        - xml
+      access: open
+      priority: p0
+      job_id: de/rechtsprechung_im_internet
+      notes: |
+        Official portal for federal court decisions.
+        ECLI identifiers available.
+        XML export for most decisions.
+
+    - name: BVerfG Database
+      url: https://www.bundesverfassungsgericht.de/entscheidungen
+      type: court_database
+      coverage:
+        temporal:
+          from: "1951"
+          to: present
+        content:
+          - All BVerfG decisions
+      formats:
+        - html
+        - pdf
+      access: open
+      priority: p0
+      job_id: de/bverfg
+      notes: Complete archive of Constitutional Court decisions
+
+    - name: ECLI Search - Germany
+      url: https://e-justice.europa.eu/content_ecli_search_engine-430-de-en.do
+      type: ecli_portal
+      coverage:
+        temporal:
+          from: varies
+          to: present
+        content:
+          - Indexed German case law with ECLI
+      formats:
+        - html
+      access: open
+      priority: p1
+      job_id: de/ecli_search
+      notes: EU portal indexing German decisions with ECLI
+
+    - name: juris (Commercial)
+      url: https://www.juris.de
+      type: case_law_portal
+      coverage:
+        temporal:
+          from: "1945"
+          to: present
+        content:
+          - Comprehensive German case law
+      formats:
+        - html
+        - pdf
+      access: credentials
+      priority: p2
+      notes: |
+        Most comprehensive commercial database.
+        Requires paid subscription.
+        Consider for completeness phase only.
+
+identifiers:
+  legislation:
+    primary_scheme: FNA (Fundstellennachweis A)
+    patterns:
+      - name: FNA Number
+        regex: "^[0-9]{3,4}-[0-9]{1,3}(-[0-9]+)?$"
+        example: "400-2"
+        description: Federal law catalogue number
+      - name: BGBl Citation
+        regex: "^BGBl\\.? (I|II) S\\.? [0-9]+"
+        example: "BGBl. I S. 1234"
+        description: Federal Law Gazette citation
+
+  case_law:
+    ecli_support: true
+    ecli_country_code: DE
+    national_schemes:
+      - name: ECLI
+        pattern: "ECLI:DE:[A-Z]+:[0-9]{4}:[A-Z0-9.]+"
+        example: "ECLI:DE:BVerfG:2020:rs20200505.2bvr085915"
+      - name: Aktenzeichen (File Reference)
+        pattern: "[0-9]+ [A-Za-z]+ [0-9]+/[0-9]+"
+        example: "1 BvR 16/13"
+        description: Traditional German case reference
+
+coverage_plan:
+  p80_legislation:
+    strategy: |
+      Start with Gesetze im Internet for consolidated federal law.
+      All major codes (BGB, StGB, GG, etc.) are available in XML.
+      Defer state law to backlog - each Land requires separate handling.
+    targets:
+      - source_ref: Gesetze im Internet
+        scope: All consolidated federal laws
+        estimated_docs: 6000
+        priority: p0
+        status: planned
+      - source_ref: BGBl
+        scope: Historical gazette for versioning
+        estimated_docs: 50000
+        priority: p1
+        status: planned
+
+  p80_case_law:
+    strategy: |
+      Start with rechtsprechung-im-internet.de for federal courts.
+      BVerfG archive is complete and high value.
+      ECLI identifiers available for recent decisions.
+      Defer commercial sources (juris) and state courts to backlog.
+    targets:
+      - source_ref: Rechtsprechung im Internet
+        scope: All federal court decisions (2010+)
+        estimated_docs: 100000
+        priority: p0
+        status: planned
+      - source_ref: BVerfG Database
+        scope: Complete Constitutional Court archive
+        estimated_docs: 15000
+        priority: p0
+        status: planned
+      - source_ref: ECLI Search - Germany
+        scope: Cross-reference for ECLI coverage
+        estimated_docs: 50000
+        priority: p1
+        status: planned
+
+  backlog:
+    # Legislation backlog
+    - id: de-bgbl-historical
+      description: Full historical BGBl archive for law versioning
+      type: legislation
+      priority: p1
+      status: planned
+    - id: de-state-law-bw
+      description: Baden-Württemberg state law
+      type: legislation
+      priority: p2
+      status: planned
+    - id: de-state-law-by
+      description: Bavaria state law
+      type: legislation
+      priority: p2
+      status: planned
+    - id: de-state-law-be
+      description: Berlin state law
+      type: legislation
+      priority: p2
+      status: planned
+    - id: de-state-law-bb
+      description: Brandenburg state law
+      type: legislation
+      priority: p2
+      status: planned
+    - id: de-state-law-hb
+      description: Bremen state law
+      type: legislation
+      priority: p2
+      status: planned
+    - id: de-state-law-hh
+      description: Hamburg state law
+      type: legislation
+      priority: p2
+      status: planned
+    - id: de-state-law-he
+      description: Hesse state law
+      type: legislation
+      priority: p2
+      status: planned
+    - id: de-state-law-mv
+      description: Mecklenburg-Vorpommern state law
+      type: legislation
+      priority: p2
+      status: planned
+    - id: de-state-law-ni
+      description: Lower Saxony state law
+      type: legislation
+      priority: p2
+      status: planned
+    - id: de-state-law-nw
+      description: North Rhine-Westphalia state law
+      type: legislation
+      priority: p2
+      status: planned
+    - id: de-state-law-rp
+      description: Rhineland-Palatinate state law
+      type: legislation
+      priority: p2
+      status: planned
+    - id: de-state-law-sl
+      description: Saarland state law
+      type: legislation
+      priority: p2
+      status: planned
+    - id: de-state-law-sn
+      description: Saxony state law
+      type: legislation
+      priority: p2
+      status: planned
+    - id: de-state-law-st
+      description: Saxony-Anhalt state law
+      type: legislation
+      priority: p2
+      status: planned
+    - id: de-state-law-sh
+      description: Schleswig-Holstein state law
+      type: legislation
+      priority: p2
+      status: planned
+    - id: de-state-law-th
+      description: Thuringia state law
+      type: legislation
+      priority: p2
+      status: planned
+
+    # Case law backlog
+    - id: de-bgh-full
+      description: Complete BGH archive (pre-2010)
+      type: case_law
+      priority: p1
+      status: planned
+    - id: de-olg-courts
+      description: Higher Regional Courts decisions
+      type: case_law
+      priority: p2
+      status: planned
+    - id: de-state-courts
+      description: State constitutional court decisions
+      type: case_law
+      priority: p2
+      status: planned
+    - id: de-juris-integration
+      description: Evaluate juris integration for completeness
+      type: infrastructure
+      priority: p2
+      status: planned
+      notes: Requires commercial subscription
+
+access:
+  model: open
+  rate_limits:
+    requests_per_second: 2
+    requests_per_day: null
+    notes: Official portals are generally permissive
+  robots_txt:
+    allows_crawling: true
+    disallowed_paths: []
+  api_available: false
+  bulk_download: true
+  notes: |
+    German official legal portals are very crawler-friendly.
+    XML exports available from major sources.
+    No API but well-structured HTML/XML.
+    BGBl requires free registration for full access.
+
+metadata:
+  last_updated: "2025-01-21"
+  maintainer: LegalDataFactory
+  status: active
+  notes: |
+    Germany's federal structure creates complexity - 16 separate state legal systems.
+    80/20 focuses on federal level first.
+    Gesetze im Internet is the gold standard for consolidated law.

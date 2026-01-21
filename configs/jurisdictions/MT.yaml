@@ -1,0 +1,148 @@
+# Malta - Unitary Republic
+
+jurisdiction:
+  iso_code: MT
+  name:
+    en: Malta
+    native: Malta
+  eu_member_since: "2004-05-01"
+  languages:
+    - mt  # Maltese
+    - en  # English
+
+legal_system:
+  type: unitary
+  hierarchy:
+    levels:
+      - name: National
+        code: national
+
+  court_structure:
+    constitutional:
+      - name:
+          en: Constitutional Court
+          native: Il-Qorti Kostituzzjonali
+        code: CC
+        ecli_code: MT:CC
+        level: constitutional
+        jurisdiction_scope: national
+
+    supreme:
+      - name:
+          en: Court of Appeal
+          native: Il-Qorti tal-Appell
+        code: CA
+        ecli_code: MT:CA
+        level: supreme
+        jurisdiction_scope: national
+
+sources:
+  legislation:
+    - name: Laws of Malta
+      url: https://legislation.mt
+      type: consolidated_legislation
+      coverage:
+        temporal:
+          from: "1854"
+          to: present
+        content:
+          - All Maltese legislation
+          - Subsidiary legislation
+      formats:
+        - html
+        - pdf
+      access: open
+      priority: p0
+      job_id: mt/legislation
+      notes: Bilingual (Maltese/English)
+
+    - name: Government Gazette
+      url: https://www.gov.mt/en/Government/Government%20Gazette
+      type: official_gazette
+      coverage:
+        temporal:
+          from: varies
+          to: present
+      formats:
+        - pdf
+      access: open
+      priority: p1
+      job_id: mt/gazette
+
+    - name: N-Lex Malta
+      url: https://n-lex.europa.eu/n-lex/pays.html?lang=en&pays=MT
+      type: n_lex_gateway
+      access: open
+      priority: p2
+
+  case_law:
+    - name: eCourts Malta
+      url: https://ecourts.gov.mt
+      type: case_law_portal
+      coverage:
+        temporal:
+          from: varies
+          to: present
+      formats:
+        - html
+        - pdf
+      access: open
+      priority: p0
+      job_id: mt/ecourts
+
+    - name: ECLI Search - Malta
+      url: https://e-justice.europa.eu/content_ecli_search_engine-430-mt-en.do
+      type: ecli_portal
+      access: open
+      priority: p1
+
+identifiers:
+  legislation:
+    primary_scheme: Chapter Number
+    patterns:
+      - name: Chapter Number
+        regex: "^(Chapter|Cap\\.) [0-9]+$"
+        example: "Chapter 12"
+
+  case_law:
+    ecli_support: true
+    ecli_country_code: MT
+
+coverage_plan:
+  p80_legislation:
+    strategy: Laws of Malta is comprehensive
+    targets:
+      - source_ref: Laws of Malta
+        scope: All legislation
+        estimated_docs: 600
+        priority: p0
+        status: planned
+
+  p80_case_law:
+    strategy: Use eCourts portal
+    targets:
+      - source_ref: eCourts Malta
+        scope: Superior court decisions
+        estimated_docs: 15000
+        priority: p0
+        status: planned
+
+  backlog:
+    - id: mt-historical
+      description: Historical British-era legislation
+      type: legislation
+      priority: p2
+      status: planned
+
+access:
+  model: open
+  rate_limits:
+    requests_per_second: 1
+  api_available: false
+  bulk_download: false
+  notes: Bilingual jurisdiction (Maltese/English)
+
+metadata:
+  last_updated: "2025-01-21"
+  maintainer: LegalDataFactory
+  status: active

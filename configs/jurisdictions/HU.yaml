@@ -1,0 +1,178 @@
+# Hungary (Magyarország) - Unitary Republic
+
+jurisdiction:
+  iso_code: HU
+  name:
+    en: Hungary
+    native: Magyarország
+  eu_member_since: "2004-05-01"
+  languages:
+    - hu
+
+legal_system:
+  type: unitary
+  hierarchy:
+    levels:
+      - name: National
+        code: national
+
+  court_structure:
+    constitutional:
+      - name:
+          en: Constitutional Court
+          native: Alkotmánybíróság
+        code: AB
+        ecli_code: HU:AB
+        level: constitutional
+        jurisdiction_scope: national
+
+    supreme:
+      - name:
+          en: Curia (Supreme Court)
+          native: Kúria
+        code: K
+        ecli_code: HU:KURIA
+        level: supreme
+        jurisdiction_scope: national
+
+    appellate:
+      - name:
+          en: Regional Courts of Appeal
+          native: Ítélőtáblák
+        code: IT
+        level: appellate
+        jurisdiction_scope: regional
+
+sources:
+  legislation:
+    - name: Magyar Közlöny (Official Gazette)
+      url: https://magyarkozlony.hu
+      type: official_gazette
+      coverage:
+        temporal:
+          from: varies
+          to: present
+        content:
+          - All Hungarian legislation
+      formats:
+        - pdf
+      access: open
+      priority: p0
+      job_id: hu/magyarkozlony
+
+    - name: Nemzeti Jogszabálytár (National Legislation Database)
+      url: https://njt.hu
+      type: consolidated_legislation
+      coverage:
+        temporal:
+          from: "2010"
+          to: present
+        content:
+          - Consolidated legislation
+      formats:
+        - html
+      access: open
+      priority: p0
+      job_id: hu/njt
+
+    - name: N-Lex Hungary
+      url: https://n-lex.europa.eu/n-lex/pays.html?lang=en&pays=HU
+      type: n_lex_gateway
+      access: open
+      priority: p2
+
+  case_law:
+    - name: Bírósági Határozatok Gyűjteménye (Court Decisions Collection)
+      url: https://bhgy.birosag.hu
+      type: case_law_portal
+      coverage:
+        temporal:
+          from: varies
+          to: present
+        content:
+          - Curia decisions
+          - Lower court decisions
+      formats:
+        - html
+      access: open
+      priority: p0
+      job_id: hu/bhgy
+
+    - name: Constitutional Court
+      url: https://www.alkotmanybirosag.hu
+      type: court_database
+      coverage:
+        temporal:
+          from: "1990"
+          to: present
+      formats:
+        - html
+        - pdf
+      access: open
+      priority: p0
+      job_id: hu/ab
+
+    - name: ECLI Search - Hungary
+      url: https://e-justice.europa.eu/content_ecli_search_engine-430-hu-en.do
+      type: ecli_portal
+      access: open
+      priority: p1
+
+identifiers:
+  legislation:
+    primary_scheme: MK Reference
+    patterns:
+      - name: Law Number
+        regex: "^[0-9]{4}\\. évi [IVXLCDM]+\\. (törvény|tv\\.)$"
+        example: "2020. évi CXXX. törvény"
+
+  case_law:
+    ecli_support: true
+    ecli_country_code: HU
+    national_schemes:
+      - name: BH Reference
+        pattern: "^BH[0-9]{4}\\.[0-9]+$"
+        example: "BH2020.123"
+
+coverage_plan:
+  p80_legislation:
+    strategy: Use NJT for consolidated texts
+    targets:
+      - source_ref: Nemzeti Jogszabálytár
+        scope: Consolidated legislation
+        estimated_docs: 8000
+        priority: p0
+        status: planned
+
+  p80_case_law:
+    strategy: Use official court database
+    targets:
+      - source_ref: Bírósági Határozatok Gyűjteménye
+        scope: Curia decisions
+        estimated_docs: 30000
+        priority: p0
+        status: planned
+      - source_ref: Constitutional Court
+        scope: All decisions
+        estimated_docs: 5000
+        priority: p0
+        status: planned
+
+  backlog:
+    - id: hu-historical
+      description: Pre-2010 legislation
+      type: legislation
+      priority: p2
+      status: planned
+
+access:
+  model: open
+  rate_limits:
+    requests_per_second: 1
+  api_available: false
+  bulk_download: false
+
+metadata:
+  last_updated: "2025-01-21"
+  maintainer: LegalDataFactory
+  status: active

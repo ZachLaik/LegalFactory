@@ -1,0 +1,151 @@
+# Croatia (Hrvatska) - Unitary Republic
+
+jurisdiction:
+  iso_code: HR
+  name:
+    en: Croatia
+    native: Hrvatska
+  eu_member_since: "2013-07-01"
+  languages:
+    - hr
+
+legal_system:
+  type: unitary
+  hierarchy:
+    levels:
+      - name: National
+        code: national
+
+  court_structure:
+    constitutional:
+      - name:
+          en: Constitutional Court
+          native: Ustavni sud
+        code: US
+        ecli_code: HR:US
+        level: constitutional
+        jurisdiction_scope: national
+
+    supreme:
+      - name:
+          en: Supreme Court
+          native: Vrhovni sud
+        code: VSRH
+        ecli_code: HR:VSRH
+        level: supreme
+        jurisdiction_scope: national
+      - name:
+          en: High Administrative Court
+          native: Visoki upravni sud
+        code: VUS
+        ecli_code: HR:VUS
+        level: supreme
+        jurisdiction_scope: national
+
+sources:
+  legislation:
+    - name: Narodne novine (Official Gazette)
+      url: https://narodne-novine.nn.hr
+      type: official_gazette
+      coverage:
+        temporal:
+          from: "1990"
+          to: present
+        content:
+          - All Croatian legislation
+      formats:
+        - html
+        - pdf
+      access: open
+      priority: p0
+      job_id: hr/nn
+
+    - name: N-Lex Croatia
+      url: https://n-lex.europa.eu/n-lex/pays.html?lang=en&pays=HR
+      type: n_lex_gateway
+      access: open
+      priority: p2
+
+  case_law:
+    - name: Supreme Court Database
+      url: https://sudskapraksa.vsrh.hr
+      type: court_database
+      coverage:
+        temporal:
+          from: varies
+          to: present
+      formats:
+        - html
+      access: open
+      priority: p0
+      job_id: hr/vsrh
+
+    - name: Constitutional Court
+      url: https://www.usud.hr
+      type: court_database
+      coverage:
+        temporal:
+          from: "1991"
+          to: present
+      formats:
+        - html
+        - pdf
+      access: open
+      priority: p0
+      job_id: hr/usud
+
+    - name: ECLI Search - Croatia
+      url: https://e-justice.europa.eu/content_ecli_search_engine-430-hr-en.do
+      type: ecli_portal
+      access: open
+      priority: p1
+
+identifiers:
+  legislation:
+    primary_scheme: NN Number
+    patterns:
+      - name: Narodne novine
+        regex: "^NN [0-9]+/[0-9]{2,4}$"
+        example: "NN 125/11"
+
+  case_law:
+    ecli_support: true
+    ecli_country_code: HR
+
+coverage_plan:
+  p80_legislation:
+    strategy: Use Narodne novine for all legislation
+    targets:
+      - source_ref: Narodne novine
+        scope: Laws and regulations
+        estimated_docs: 8000
+        priority: p0
+        status: planned
+
+  p80_case_law:
+    strategy: Focus on supreme courts
+    targets:
+      - source_ref: Supreme Court Database
+        scope: Published decisions
+        estimated_docs: 15000
+        priority: p0
+        status: planned
+
+  backlog:
+    - id: hr-lower-courts
+      description: Lower court decisions
+      type: case_law
+      priority: p2
+      status: planned
+
+access:
+  model: open
+  rate_limits:
+    requests_per_second: 1
+  api_available: false
+  bulk_download: false
+
+metadata:
+  last_updated: "2025-01-21"
+  maintainer: LegalDataFactory
+  status: active

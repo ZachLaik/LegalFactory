@@ -1,0 +1,44 @@
+{
+  "ecli": "ECLI:EU:C:2014:317",
+  "celex": "62012CJ0131",
+  "title": "Google Spain SL and Google Inc. v Agencia Española de Protección de Datos (AEPD) and Mario Costeja González",
+  "date_document": "2014-05-13",
+  "court": "Court of Justice",
+  "chamber": "Grand Chamber",
+  "court_ecli_code": "EU:C",
+  "case_number": "C-131/12",
+  "decision_type": "Judgment",
+  "parties": [
+    "Google Spain SL",
+    "Google Inc.",
+    "Agencia Española de Protección de Datos (AEPD)",
+    "Mario Costeja González"
+  ],
+  "subject_matters": [
+    "Personal data",
+    "Protection of individuals",
+    "Internet search engine"
+  ],
+  "keywords": [
+    "right to be forgotten",
+    "search engine",
+    "personal data",
+    "data protection"
+  ],
+  "procedure_type": "Reference for a preliminary ruling",
+  "advocate_general": "Niilo Jääskinen",
+  "advocate_general_opinion_date": "2013-06-25",
+  "references_to_legislation": [
+    "31995L0046"
+  ],
+  "expected_extracted": {
+    "jurisdiction": "EU",
+    "doc_type": "case_law",
+    "source_system": "curia",
+    "canonical_id": "ECLI:EU:C:2014:317",
+    "title": "Google Spain SL and Google Inc. v Agencia Española de Protección de Datos (AEPD) and Mario Costeja González",
+    "court": "Court of Justice",
+    "case_number": "C-131/12",
+    "decision_type": "Judgment"
+  }
+}

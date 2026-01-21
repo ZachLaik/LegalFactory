@@ -1,0 +1,192 @@
+# Ireland (Éire) - Unitary Republic
+
+jurisdiction:
+  iso_code: IE
+  name:
+    en: Ireland
+    native: Éire
+  eu_member_since: "1973-01-01"
+  languages:
+    - en  # English
+    - ga  # Irish (Gaeilge)
+
+legal_system:
+  type: unitary
+  hierarchy:
+    levels:
+      - name: National
+        code: national
+
+  court_structure:
+    supreme:
+      - name:
+          en: Supreme Court
+          native: An Chúirt Uachtarach
+        code: SC
+        ecli_code: IE:SC
+        level: supreme
+        jurisdiction_scope: national
+      - name:
+          en: Court of Appeal
+          native: An Chúirt Achomhairc
+        code: CA
+        ecli_code: IE:CA
+        level: appellate
+        jurisdiction_scope: national
+
+    appellate:
+      - name:
+          en: High Court
+          native: An Ard-Chúirt
+        code: HC
+        ecli_code: IE:HC
+        level: appellate
+        jurisdiction_scope: national
+
+sources:
+  legislation:
+    - name: Irish Statute Book
+      url: https://www.irishstatutebook.ie
+      type: consolidated_legislation
+      coverage:
+        temporal:
+          from: "1922"
+          to: present
+        content:
+          - Acts of the Oireachtas
+          - Statutory Instruments
+          - Pre-1922 statutes still in force
+      formats:
+        - html
+        - pdf
+      access: open
+      priority: p0
+      job_id: ie/statutebook
+
+    - name: Revised Acts (Law Reform Commission)
+      url: https://revisedacts.lawreform.ie
+      type: consolidated_legislation
+      coverage:
+        temporal:
+          from: varies
+          to: present
+        content:
+          - Consolidated/revised statutes
+      formats:
+        - html
+        - pdf
+      access: open
+      priority: p0
+      job_id: ie/revisedacts
+
+    - name: N-Lex Ireland
+      url: https://n-lex.europa.eu/n-lex/pays.html?lang=en&pays=IE
+      type: n_lex_gateway
+      access: open
+      priority: p2
+
+  case_law:
+    - name: Courts Service Online
+      url: https://www.courts.ie/judgments
+      type: case_law_portal
+      coverage:
+        temporal:
+          from: "2000"
+          to: present
+        content:
+          - Supreme Court
+          - Court of Appeal
+          - High Court
+      formats:
+        - html
+        - pdf
+      access: open
+      priority: p0
+      job_id: ie/courts
+
+    - name: BAILII (Ireland section)
+      url: https://www.bailii.org/ie/
+      type: case_law_portal
+      coverage:
+        temporal:
+          from: varies
+          to: present
+      formats:
+        - html
+      access: open
+      priority: p1
+      job_id: ie/bailii
+
+    - name: ECLI Search - Ireland
+      url: https://e-justice.europa.eu/content_ecli_search_engine-430-ie-en.do
+      type: ecli_portal
+      access: open
+      priority: p1
+
+identifiers:
+  legislation:
+    primary_scheme: Act Number
+    patterns:
+      - name: Act Number
+        regex: "^(Act )?No\\.? [0-9]+/[0-9]{4}$"
+        example: "Act No. 26/2015"
+      - name: SI Number
+        regex: "^S\\.?I\\.? No\\.? [0-9]+ of [0-9]{4}$"
+        example: "S.I. No. 100 of 2020"
+
+  case_law:
+    ecli_support: true
+    ecli_country_code: IE
+    national_schemes:
+      - name: Neutral Citation
+        pattern: "\\[[0-9]{4}\\] IE(SC|CA|HC) [0-9]+"
+        example: "[2020] IESC 12"
+
+coverage_plan:
+  p80_legislation:
+    strategy: Use Irish Statute Book and Revised Acts
+    targets:
+      - source_ref: Irish Statute Book
+        scope: All Acts and SIs
+        estimated_docs: 25000
+        priority: p0
+        status: planned
+      - source_ref: Revised Acts
+        scope: Consolidated versions
+        estimated_docs: 1000
+        priority: p0
+        status: planned
+
+  p80_case_law:
+    strategy: Use Courts Service for superior courts
+    targets:
+      - source_ref: Courts Service Online
+        scope: Superior court judgments
+        estimated_docs: 15000
+        priority: p0
+        status: planned
+
+  backlog:
+    - id: ie-historical
+      description: Pre-1922 statutes
+      type: legislation
+      priority: p2
+      status: planned
+    - id: ie-circuit
+      description: Circuit Court decisions
+      type: case_law
+      priority: p2
+      status: planned
+
+access:
+  model: open
+  rate_limits:
+    requests_per_second: 2
+  api_available: false
+  bulk_download: false
+  notes: Common law system, BAILII provides additional coverage
+
+metadata:
+  last_updated: "2025-01-21"
+  maintainer: LegalDataFactory
+  status: active

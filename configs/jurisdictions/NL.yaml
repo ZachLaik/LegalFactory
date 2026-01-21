@@ -1,0 +1,220 @@
+# Netherlands (Nederland) - Decentralized Unitary State
+
+jurisdiction:
+  iso_code: NL
+  name:
+    en: Netherlands
+    native: Nederland
+  eu_member_since: "1958-01-01"  # Founding member
+  languages:
+    - nl
+
+legal_system:
+  type: unitary
+  hierarchy:
+    levels:
+      - name: National
+        code: national
+      - name: Caribbean parts
+        code: caribbean
+        subdivisions:
+          - name: Aruba
+            code: AW
+            notes: Country within Kingdom, not EU
+          - name: Curaçao
+            code: CW
+            notes: Country within Kingdom, not EU
+          - name: Sint Maarten
+            code: SX
+            notes: Country within Kingdom, not EU
+          - name: BES Islands
+            code: BES
+            notes: Special municipalities (Bonaire, St. Eustatius, Saba)
+
+  court_structure:
+    supreme:
+      - name:
+          en: Supreme Court
+          native: Hoge Raad
+        code: HR
+        ecli_code: NL:HR
+        level: supreme
+        jurisdiction_scope: national
+      - name:
+          en: Council of State (Administrative Division)
+          native: Afdeling bestuursrechtspraak Raad van State
+        code: RVS
+        ecli_code: NL:RVS
+        level: supreme
+        jurisdiction_scope: national
+
+    appellate:
+      - name:
+          en: Courts of Appeal
+          native: Gerechtshoven
+        code: GH
+        level: appellate
+        jurisdiction_scope: regional
+
+    specialized:
+      - name:
+          en: Central Appeals Tribunal
+          native: Centrale Raad van Beroep
+        code: CRVB
+        ecli_code: NL:CRVB
+        level: specialized
+        jurisdiction_scope: national
+        notes: Social security and civil service appeals
+      - name:
+          en: Trade and Industry Appeals Tribunal
+          native: College van Beroep voor het bedrijfsleven
+        code: CBB
+        ecli_code: NL:CBB
+        level: specialized
+        jurisdiction_scope: national
+
+sources:
+  legislation:
+    - name: Overheid.nl (wetten.nl)
+      url: https://wetten.overheid.nl
+      type: consolidated_legislation
+      coverage:
+        temporal:
+          from: varies
+          to: present
+        content:
+          - All Dutch legislation
+          - Consolidated texts
+          - Treaties
+      formats:
+        - html
+        - xml
+      access: open
+      priority: p0
+      job_id: nl/wetten
+      notes: |
+        Official government portal.
+        BWB (Basic Legislation Administration) identifiers.
+        API available.
+
+    - name: Officiële bekendmakingen
+      url: https://zoek.officielebekendmakingen.nl
+      type: official_gazette
+      coverage:
+        temporal:
+          from: "1995"
+          to: present
+        content:
+          - Staatsblad (State Gazette)
+          - Staatscourant (State Journal)
+          - Tractatenblad (Treaty Gazette)
+      formats:
+        - html
+        - pdf
+        - xml
+      access: open
+      priority: p1
+      job_id: nl/bekendmakingen
+
+    - name: N-Lex Netherlands
+      url: https://n-lex.europa.eu/n-lex/pays.html?lang=en&pays=NL
+      type: n_lex_gateway
+      access: open
+      priority: p2
+
+  case_law:
+    - name: Rechtspraak.nl
+      url: https://www.rechtspraak.nl
+      type: case_law_portal
+      coverage:
+        temporal:
+          from: "1999"
+          to: present
+        content:
+          - All Dutch courts
+          - Comprehensive selection
+      formats:
+        - html
+        - xml
+      access: open
+      priority: p0
+      job_id: nl/rechtspraak
+      notes: |
+        Excellent official portal.
+        Open Data API available.
+        ECLI identifiers for all decisions.
+
+    - name: ECLI Search - Netherlands
+      url: https://e-justice.europa.eu/content_ecli_search_engine-430-nl-en.do
+      type: ecli_portal
+      access: open
+      priority: p1
+
+identifiers:
+  legislation:
+    primary_scheme: BWB ID
+    patterns:
+      - name: BWB ID
+        regex: "^BWBR[0-9]{7}$"
+        example: "BWBR0001840"
+      - name: Staatsblad Reference
+        regex: "^Stb\\. [0-9]{4},? [0-9]+$"
+        example: "Stb. 2020, 123"
+
+  case_law:
+    ecli_support: true
+    ecli_country_code: NL
+    national_schemes:
+      - name: ECLI
+        pattern: "ECLI:NL:[A-Z]+:[0-9]{4}:[A-Z0-9]+"
+        example: "ECLI:NL:HR:2020:123"
+        description: All Dutch decisions have ECLI
+
+coverage_plan:
+  p80_legislation:
+    strategy: Overheid.nl is comprehensive official source with API
+    targets:
+      - source_ref: Overheid.nl (wetten.nl)
+        scope: All consolidated legislation
+        estimated_docs: 10000
+        priority: p0
+        status: planned
+
+  p80_case_law:
+    strategy: Rechtspraak.nl has excellent coverage with API
+    targets:
+      - source_ref: Rechtspraak.nl
+        scope: All published decisions
+        estimated_docs: 500000
+        priority: p0
+        status: planned
+
+  backlog:
+    - id: nl-caribbean
+      description: Kingdom Caribbean parts legislation
+      type: legislation
+      priority: p2
+      status: planned
+    - id: nl-historical
+      description: Pre-1995 gazette archives
+      type: legislation
+      priority: p2
+      status: planned
+
+access:
+  model: open
+  rate_limits:
+    requests_per_second: 5
+    notes: API has generous limits
+  api_available: true
+  bulk_download: true
+  notes: |
+    Netherlands has excellent legal data infrastructure.
+    Open Data APIs for both legislation and case law.
+    ECLI universally adopted.
+
+metadata:
+  last_updated: "2025-01-21"
+  maintainer: LegalDataFactory
+  status: active
+  notes: Model jurisdiction for open legal data

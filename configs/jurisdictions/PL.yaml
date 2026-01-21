@@ -1,0 +1,203 @@
+# Poland (Polska) - Unitary Republic
+
+jurisdiction:
+  iso_code: PL
+  name:
+    en: Poland
+    native: Polska
+  eu_member_since: "2004-05-01"
+  languages:
+    - pl
+
+legal_system:
+  type: unitary
+  hierarchy:
+    levels:
+      - name: National
+        code: national
+
+  court_structure:
+    constitutional:
+      - name:
+          en: Constitutional Tribunal
+          native: Trybunał Konstytucyjny
+        code: TK
+        ecli_code: PL:TK
+        level: constitutional
+        jurisdiction_scope: national
+
+    supreme:
+      - name:
+          en: Supreme Court
+          native: Sąd Najwyższy
+        code: SN
+        ecli_code: PL:SN
+        level: supreme
+        jurisdiction_scope: national
+      - name:
+          en: Supreme Administrative Court
+          native: Naczelny Sąd Administracyjny
+        code: NSA
+        ecli_code: PL:NSA
+        level: supreme
+        jurisdiction_scope: national
+
+    appellate:
+      - name:
+          en: Courts of Appeal
+          native: Sądy Apelacyjne
+        code: SA
+        level: appellate
+        jurisdiction_scope: regional
+
+sources:
+  legislation:
+    - name: ISAP (Internet System of Legal Acts)
+      url: https://isap.sejm.gov.pl
+      type: consolidated_legislation
+      coverage:
+        temporal:
+          from: "1918"
+          to: present
+        content:
+          - All Polish legislation
+          - Consolidated texts (teksty jednolite)
+      formats:
+        - html
+        - pdf
+      access: open
+      priority: p0
+      job_id: pl/isap
+      notes: Official parliamentary legal database
+
+    - name: Dziennik Ustaw (Journal of Laws)
+      url: https://dziennikustaw.gov.pl
+      type: official_gazette
+      coverage:
+        temporal:
+          from: "1918"
+          to: present
+      formats:
+        - pdf
+      access: open
+      priority: p1
+      job_id: pl/dziennikustaw
+
+    - name: N-Lex Poland
+      url: https://n-lex.europa.eu/n-lex/pays.html?lang=en&pays=PL
+      type: n_lex_gateway
+      access: open
+      priority: p2
+
+  case_law:
+    - name: Supreme Court Database
+      url: https://www.sn.pl/orzecznictwo/
+      type: court_database
+      coverage:
+        temporal:
+          from: varies
+          to: present
+      formats:
+        - html
+        - pdf
+      access: open
+      priority: p0
+      job_id: pl/sn
+
+    - name: Constitutional Tribunal
+      url: https://ipo.trybunal.gov.pl
+      type: court_database
+      coverage:
+        temporal:
+          from: "1986"
+          to: present
+      formats:
+        - html
+        - pdf
+      access: open
+      priority: p0
+      job_id: pl/tk
+
+    - name: CBOSA (Administrative Courts Database)
+      url: https://orzeczenia.nsa.gov.pl
+      type: case_law_portal
+      coverage:
+        temporal:
+          from: varies
+          to: present
+      formats:
+        - html
+      access: open
+      priority: p0
+      job_id: pl/cbosa
+
+    - name: ECLI Search - Poland
+      url: https://e-justice.europa.eu/content_ecli_search_engine-430-pl-en.do
+      type: ecli_portal
+      access: open
+      priority: p1
+
+identifiers:
+  legislation:
+    primary_scheme: Dz.U. Reference
+    patterns:
+      - name: Journal of Laws
+        regex: "^Dz\\.?U\\.? [0-9]{4}\\.?[0-9]+(\\.[0-9]+)?$"
+        example: "Dz.U. 2020.1234"
+
+  case_law:
+    ecli_support: true
+    ecli_country_code: PL
+    national_schemes:
+      - name: Sygnatura (Case Reference)
+        pattern: "[A-Z]+ [0-9]+/[0-9]+"
+        example: "I CSK 123/20"
+
+coverage_plan:
+  p80_legislation:
+    strategy: ISAP is comprehensive official source
+    targets:
+      - source_ref: ISAP
+        scope: All consolidated legislation
+        estimated_docs: 30000
+        priority: p0
+        status: planned
+
+  p80_case_law:
+    strategy: Use official court databases
+    targets:
+      - source_ref: Supreme Court Database
+        scope: SN decisions
+        estimated_docs: 50000
+        priority: p0
+        status: planned
+      - source_ref: Constitutional Tribunal
+        scope: TK decisions
+        estimated_docs: 5000
+        priority: p0
+        status: planned
+      - source_ref: CBOSA
+        scope: NSA decisions
+        estimated_docs: 200000
+        priority: p0
+        status: planned
+
+  backlog:
+    - id: pl-regional-courts
+      description: Regional court decisions
+      type: case_law
+      priority: p2
+      status: planned
+
+access:
+  model: open
+  rate_limits:
+    requests_per_second: 2
+  api_available: false
+  bulk_download: false
+  notes: Good official portals but no API
+
+metadata:
+  last_updated: "2025-01-21"
+  maintainer: LegalDataFactory
+  status: active

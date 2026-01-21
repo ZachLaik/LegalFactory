@@ -1,0 +1,148 @@
+# Cyprus (Κύπρος / Kıbrıs) - Unitary Republic
+
+jurisdiction:
+  iso_code: CY
+  name:
+    en: Cyprus
+    native: Κύπρος
+  eu_member_since: "2004-05-01"
+  languages:
+    - el  # Greek
+    - tr  # Turkish (official but limited use in Republic of Cyprus)
+
+legal_system:
+  type: unitary
+  hierarchy:
+    levels:
+      - name: National
+        code: national
+        notes: EU law applies only to areas under government control
+
+  court_structure:
+    constitutional:
+      - name:
+          en: Supreme Constitutional Court
+          native: Ανώτατο Συνταγματικό Δικαστήριο
+        code: SCC
+        level: constitutional
+        jurisdiction_scope: national
+        notes: Functions absorbed by Supreme Court since 1964
+
+    supreme:
+      - name:
+          en: Supreme Court
+          native: Ανώτατο Δικαστήριο
+        code: SC
+        ecli_code: CY:SC
+        level: supreme
+        jurisdiction_scope: national
+
+sources:
+  legislation:
+    - name: CyLaw
+      url: https://www.cylaw.org
+      type: consolidated_legislation
+      coverage:
+        temporal:
+          from: "1960"
+          to: present
+        content:
+          - Laws
+          - Regulations
+          - Court rules
+      formats:
+        - html
+        - pdf
+      access: open
+      priority: p0
+      job_id: cy/cylaw
+
+    - name: Official Gazette
+      url: https://www.mof.gov.cy/mof/gpo/gpo.nsf
+      type: official_gazette
+      coverage:
+        temporal:
+          from: "1960"
+          to: present
+      formats:
+        - pdf
+      access: open
+      priority: p1
+      job_id: cy/gazette
+
+    - name: N-Lex Cyprus
+      url: https://n-lex.europa.eu/n-lex/pays.html?lang=en&pays=CY
+      type: n_lex_gateway
+      access: open
+      priority: p2
+
+  case_law:
+    - name: CyLaw Case Law
+      url: https://www.cylaw.org/nomologia/
+      type: case_law_portal
+      coverage:
+        temporal:
+          from: varies
+          to: present
+      formats:
+        - html
+      access: open
+      priority: p0
+      job_id: cy/cylaw_caselaw
+
+    - name: ECLI Search - Cyprus
+      url: https://e-justice.europa.eu/content_ecli_search_engine-430-cy-en.do
+      type: ecli_portal
+      access: open
+      priority: p1
+
+identifiers:
+  legislation:
+    primary_scheme: Law Number
+    patterns:
+      - name: Law Number
+        regex: "^N\\.? [0-9]+\\([A-Z]+\\)/[0-9]{4}$"
+        example: "N. 125(I)/2020"
+
+  case_law:
+    ecli_support: true
+    ecli_country_code: CY
+
+coverage_plan:
+  p80_legislation:
+    strategy: CyLaw is the primary source
+    targets:
+      - source_ref: CyLaw
+        scope: All laws and regulations
+        estimated_docs: 5000
+        priority: p0
+        status: planned
+
+  p80_case_law:
+    strategy: Use CyLaw case law section
+    targets:
+      - source_ref: CyLaw Case Law
+        scope: Supreme Court decisions
+        estimated_docs: 10000
+        priority: p0
+        status: planned
+
+  backlog:
+    - id: cy-historical
+      description: Pre-independence legislation (British era)
+      type: legislation
+      priority: p2
+      status: planned
+
+access:
+  model: open
+  rate_limits:
+    requests_per_second: 1
+  api_available: false
+  bulk_download: false
+  notes: Bilingual (Greek/English) content available
+
+metadata:
+  last_updated: "2025-01-21"
+  maintainer: LegalDataFactory
+  status: active

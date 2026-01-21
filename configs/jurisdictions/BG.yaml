@@ -1,0 +1,169 @@
+# Bulgaria (България) - Unitary Republic
+
+jurisdiction:
+  iso_code: BG
+  name:
+    en: Bulgaria
+    native: България
+  eu_member_since: "2007-01-01"
+  languages:
+    - bg
+
+legal_system:
+  type: unitary
+  hierarchy:
+    levels:
+      - name: National
+        code: national
+
+  court_structure:
+    constitutional:
+      - name:
+          en: Constitutional Court
+          native: Конституционен съд
+        code: KS
+        ecli_code: BG:KS
+        level: constitutional
+        jurisdiction_scope: national
+
+    supreme:
+      - name:
+          en: Supreme Court of Cassation
+          native: Върховен касационен съд
+        code: VKS
+        ecli_code: BG:VKS
+        level: supreme
+        jurisdiction_scope: national
+      - name:
+          en: Supreme Administrative Court
+          native: Върховен административен съд
+        code: VAS
+        ecli_code: BG:VAS
+        level: supreme
+        jurisdiction_scope: national
+
+sources:
+  legislation:
+    - name: Lex.bg
+      url: https://lex.bg
+      type: consolidated_legislation
+      coverage:
+        temporal:
+          from: "1991"
+          to: present
+        content:
+          - Bulgarian legislation
+          - Consolidated texts
+      formats:
+        - html
+      access: open
+      priority: p0
+      job_id: bg/lexbg
+
+    - name: State Gazette (Държавен вестник)
+      url: https://dv.parliament.bg
+      type: official_gazette
+      coverage:
+        temporal:
+          from: "1879"
+          to: present
+      formats:
+        - html
+        - pdf
+      access: open
+      priority: p1
+      job_id: bg/dv
+
+    - name: N-Lex Bulgaria
+      url: https://n-lex.europa.eu/n-lex/pays.html?lang=en&pays=BG
+      type: n_lex_gateway
+      access: open
+      priority: p2
+
+  case_law:
+    - name: Supreme Court of Cassation
+      url: https://www.vks.bg
+      type: court_database
+      coverage:
+        temporal:
+          from: varies
+          to: present
+      formats:
+        - html
+        - pdf
+      access: open
+      priority: p0
+      job_id: bg/vks
+
+    - name: Supreme Administrative Court
+      url: https://www.sac.government.bg
+      type: court_database
+      coverage:
+        temporal:
+          from: varies
+          to: present
+      formats:
+        - html
+      access: open
+      priority: p0
+      job_id: bg/vas
+
+    - name: ECLI Search - Bulgaria
+      url: https://e-justice.europa.eu/content_ecli_search_engine-430-bg-en.do
+      type: ecli_portal
+      access: open
+      priority: p1
+
+identifiers:
+  legislation:
+    primary_scheme: DV Number
+    patterns:
+      - name: State Gazette
+        regex: "^ДВ,? бр\\.? [0-9]+/[0-9]{4}$"
+        example: "ДВ, бр. 46/2007"
+
+  case_law:
+    ecli_support: true
+    ecli_country_code: BG
+    national_schemes:
+      - name: ECLI
+        pattern: "ECLI:BG:[A-Z]+:[0-9]{4}:[A-Z0-9.]+"
+
+coverage_plan:
+  p80_legislation:
+    strategy: Use Lex.bg for consolidated texts
+    targets:
+      - source_ref: Lex.bg
+        scope: Major codes and laws
+        estimated_docs: 3000
+        priority: p0
+        status: planned
+
+  p80_case_law:
+    strategy: Focus on supreme courts
+    targets:
+      - source_ref: Supreme Court of Cassation
+        scope: Published decisions
+        estimated_docs: 20000
+        priority: p0
+        status: planned
+
+  backlog:
+    - id: bg-historical
+      description: Historical legislation
+      type: legislation
+      priority: p2
+      status: planned
+
+access:
+  model: open
+  rate_limits:
+    requests_per_second: 1
+  api_available: false
+  bulk_download: false
+  notes: Cyrillic script requires encoding handling
+
+metadata:
+  last_updated: "2025-01-21"
+  maintainer: LegalDataFactory
+  status: active

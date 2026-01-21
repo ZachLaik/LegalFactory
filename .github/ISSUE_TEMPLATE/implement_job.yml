@@ -1,0 +1,105 @@
+name: Implement Job
+description: Create scraper/parser job for a data source
+title: "[JOB] <ISO>/<source>: Implement scraper"
+labels: ["type:scraper"]
+body:
+  - type: dropdown
+    id: country
+    attributes:
+      label: Country/Jurisdiction
+      description: Select the jurisdiction
+      options:
+        - EU (European Union)
+        - AT (Austria)
+        - BE (Belgium)
+        - BG (Bulgaria)
+        - CY (Cyprus)
+        - CZ (Czech Republic)
+        - DE (Germany)
+        - DK (Denmark)
+        - EE (Estonia)
+        - ES (Spain)
+        - FI (Finland)
+        - FR (France)
+        - GR (Greece)
+        - HR (Croatia)
+        - HU (Hungary)
+        - IE (Ireland)
+        - IT (Italy)
+        - LT (Lithuania)
+        - LU (Luxembourg)
+        - LV (Latvia)
+        - MT (Malta)
+        - NL (Netherlands)
+        - PL (Poland)
+        - PT (Portugal)
+        - RO (Romania)
+        - SE (Sweden)
+        - SI (Slovenia)
+        - SK (Slovakia)
+    validations:
+      required: true
+
+  - type: input
+    id: source_name
+    attributes:
+      label: Source Name
+      description: Name of the data source (from configs/jurisdictions/*.yaml)
+      placeholder: "e.g., EUR-Lex, Gesetze im Internet, Légifrance"
+    validations:
+      required: true
+
+  - type: input
+    id: job_id
+    attributes:
+      label: Job ID
+      description: The job identifier (jobs/<iso>/<source>.py)
+      placeholder: "e.g., eu/eurlex_legislation, de/gesetze_im_internet"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: doc_type
+    attributes:
+      label: Document Type
+      options:
+        - Legislation
+        - Case Law
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      options:
+        - P0 (Critical 80/20)
+        - P1 (Important)
+        - P2 (Nice-to-have)
+    validations:
+      required: true
+
+  - type: textarea
+    id: source_details
+    attributes:
+      label: Source Details
+      description: Key information about the source
+      placeholder: |
+        URL:
+        API Available: Yes/No
+        Rate Limits:
+        Authentication:
+        Output Format:
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance Criteria
+      value: |
+        - [ ] jobs/<iso>/<source>.py implemented
+        - [ ] Parser extracts required metadata
+        - [ ] Rate limiting implemented
+        - [ ] Error handling and retries
+        - [ ] tests/fixtures/<source>/*.json created
+        - [ ] Unit tests passing
+        - [ ] Integration test (limit=1) passing

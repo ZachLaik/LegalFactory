@@ -1,0 +1,193 @@
+# Romania (România) - Unitary Republic
+
+jurisdiction:
+  iso_code: RO
+  name:
+    en: Romania
+    native: România
+  eu_member_since: "2007-01-01"
+  languages:
+    - ro
+
+legal_system:
+  type: unitary
+  hierarchy:
+    levels:
+      - name: National
+        code: national
+
+  court_structure:
+    constitutional:
+      - name:
+          en: Constitutional Court
+          native: Curtea Constituțională
+        code: CCR
+        ecli_code: RO:CCR
+        level: constitutional
+        jurisdiction_scope: national
+
+    supreme:
+      - name:
+          en: High Court of Cassation and Justice
+          native: Înalta Curte de Casație și Justiție
+        code: ICCJ
+        ecli_code: RO:ICCJ
+        level: supreme
+        jurisdiction_scope: national
+
+    appellate:
+      - name:
+          en: Courts of Appeal
+          native: Curțile de Apel
+        code: CA
+        level: appellate
+        jurisdiction_scope: regional
+
+sources:
+  legislation:
+    - name: Legislație (Official Portal)
+      url: https://legislatie.just.ro
+      type: consolidated_legislation
+      coverage:
+        temporal:
+          from: varies
+          to: present
+        content:
+          - Romanian legislation
+          - Consolidated texts
+      formats:
+        - html
+      access: open
+      priority: p0
+      job_id: ro/legislatie
+
+    - name: Monitorul Oficial (Official Gazette)
+      url: https://www.monitoruloficial.ro
+      type: official_gazette
+      coverage:
+        temporal:
+          from: "1990"
+          to: present
+      formats:
+        - pdf
+      access: registration
+      priority: p1
+      job_id: ro/monitoruloficial
+      notes: Free registration required for full access
+
+    - name: N-Lex Romania
+      url: https://n-lex.europa.eu/n-lex/pays.html?lang=en&pays=RO
+      type: n_lex_gateway
+      access: open
+      priority: p2
+
+  case_law:
+    - name: ÎCCJ Jurisprudence
+      url: https://www.scj.ro
+      type: court_database
+      coverage:
+        temporal:
+          from: varies
+          to: present
+      formats:
+        - html
+        - pdf
+      access: open
+      priority: p0
+      job_id: ro/iccj
+
+    - name: Constitutional Court
+      url: https://www.ccr.ro
+      type: court_database
+      coverage:
+        temporal:
+          from: "1992"
+          to: present
+      formats:
+        - html
+        - pdf
+      access: open
+      priority: p0
+      job_id: ro/ccr
+
+    - name: Jurindex (Court Decisions Portal)
+      url: https://www.jurindex.ro
+      type: case_law_portal
+      coverage:
+        temporal:
+          from: varies
+          to: present
+      formats:
+        - html
+      access: open
+      priority: p0
+      job_id: ro/jurindex
+
+    - name: ECLI Search - Romania
+      url: https://e-justice.europa.eu/content_ecli_search_engine-430-ro-en.do
+      type: ecli_portal
+      access: open
+      priority: p1
+
+identifiers:
+  legislation:
+    primary_scheme: MO Reference
+    patterns:
+      - name: Monitorul Oficial
+        regex: "^M\\.? ?Of\\.?,? (Partea I,? )?nr\\.? [0-9]+/[0-9]{4}$"
+        example: "M. Of., Partea I, nr. 123/2020"
+      - name: Law Number
+        regex: "^Legea nr\\.? [0-9]+/[0-9]{4}$"
+        example: "Legea nr. 287/2009"
+
+  case_law:
+    ecli_support: true
+    ecli_country_code: RO
+    national_schemes:
+      - name: Decision Number
+        pattern: "^Decizia nr\\.? [0-9]+/[0-9]{4}$"
+        example: "Decizia nr. 100/2020"
+
+coverage_plan:
+  p80_legislation:
+    strategy: Use official legislation portal
+    targets:
+      - source_ref: Legislație
+        scope: Major codes and laws
+        estimated_docs: 15000
+        priority: p0
+        status: planned
+
+  p80_case_law:
+    strategy: Focus on supreme courts
+    targets:
+      - source_ref: ÎCCJ Jurisprudence
+        scope: High Court decisions
+        estimated_docs: 50000
+        priority: p0
+        status: planned
+      - source_ref: Constitutional Court
+        scope: CCR decisions
+        estimated_docs: 5000
+        priority: p0
+        status: planned
+
+  backlog:
+    - id: ro-courts-appeal
+      description: Courts of appeal decisions
+      type: case_law
+      priority: p2
+      status: planned
+
+access:
+  model: partial
+  rate_limits:
+    requests_per_second: 1
+  api_available: false
+  bulk_download: false
+  notes: Monitorul Oficial requires registration
+
+metadata:
+  last_updated: "2025-01-21"
+  maintainer: LegalDataFactory
+  status: active

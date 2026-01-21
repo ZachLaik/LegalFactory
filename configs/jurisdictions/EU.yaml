@@ -1,0 +1,308 @@
+# EU (European Union) - Supranational Level
+# Master configuration for EU-level legislation and case law
+
+jurisdiction:
+  iso_code: EU
+  name:
+    en: European Union
+    native: null  # Multiple official languages
+  eu_member_since: null  # EU itself
+  languages:
+    - bg  # Bulgarian
+    - cs  # Czech
+    - da  # Danish
+    - de  # German
+    - el  # Greek
+    - en  # English
+    - es  # Spanish
+    - et  # Estonian
+    - fi  # Finnish
+    - fr  # French
+    - ga  # Irish
+    - hr  # Croatian
+    - hu  # Hungarian
+    - it  # Italian
+    - lt  # Lithuanian
+    - lv  # Latvian
+    - mt  # Maltese
+    - nl  # Dutch
+    - pl  # Polish
+    - pt  # Portuguese
+    - ro  # Romanian
+    - sk  # Slovak
+    - sl  # Slovenian
+    - sv  # Swedish
+
+legal_system:
+  type: supranational
+  hierarchy:
+    levels:
+      - name: EU Primary Law
+        code: primary
+        description: Treaties and Charter of Fundamental Rights
+      - name: EU Secondary Law
+        code: secondary
+        description: Regulations, Directives, Decisions
+      - name: EU Tertiary/Soft Law
+        code: tertiary
+        description: Recommendations, Opinions, Guidelines
+
+  court_structure:
+    constitutional:
+      - name:
+          en: Court of Justice of the European Union
+          native: Cour de justice de l'Union européenne
+        code: CJEU
+        ecli_code: EU:C
+        level: supreme
+        jurisdiction_scope: supranational
+
+    supreme:
+      - name:
+          en: Court of Justice (ECJ)
+          native: Cour de justice
+        code: ECJ
+        ecli_code: EU:C
+        level: supreme
+        jurisdiction_scope: supranational
+
+    appellate:
+      - name:
+          en: General Court
+          native: Tribunal
+        code: GC
+        ecli_code: EU:T
+        level: appellate
+        jurisdiction_scope: supranational
+
+    specialized:
+      - name:
+          en: Civil Service Tribunal (abolished 2016)
+          native: Tribunal de la fonction publique
+        code: CST
+        ecli_code: EU:F
+        level: specialized
+        jurisdiction_scope: supranational
+        notes: Abolished 1 September 2016, jurisdiction transferred to General Court
+
+sources:
+  legislation:
+    - name: EUR-Lex
+      url: https://eur-lex.europa.eu
+      type: consolidated_legislation
+      coverage:
+        temporal:
+          from: "1951"
+          to: present
+          notes: Complete coverage of EU law
+        content:
+          - Treaties
+          - Regulations
+          - Directives
+          - Decisions
+          - Recommendations
+          - Opinions
+          - International agreements
+          - Preparatory acts
+      formats:
+        - html
+        - pdf
+        - xml
+      access: open
+      priority: p0
+      job_id: eu/eurlex_legislation
+      notes: |
+        Primary source for all EU legislation.
+        CELEX identifiers are authoritative.
+        REST API available (requires registration).
+        Bulk download available via Open Data Portal.
+
+    - name: EU Open Data Portal
+      url: https://data.europa.eu
+      type: api
+      coverage:
+        temporal:
+          from: "1951"
+          to: present
+        content:
+          - Legislation metadata
+          - CELLAR identifiers
+      formats:
+        - json
+        - xml
+      access: open
+      priority: p1
+      job_id: eu/opendata
+      notes: Structured data access, SPARQL endpoint available
+
+  case_law:
+    - name: EUR-Lex Case Law
+      url: https://eur-lex.europa.eu/collection/eu-law/eu-case-law.html
+      type: case_law_portal
+      coverage:
+        temporal:
+          from: "1954"
+          to: present
+          notes: ECJ cases from founding
+        content:
+          - CJEU judgments
+          - General Court judgments
+          - Advocate General opinions
+          - Orders
+      formats:
+        - html
+        - pdf
+      access: open
+      priority: p0
+      job_id: eu/eurlex_caselaw
+      notes: Full text of all CJEU decisions
+
+    - name: CURIA
+      url: https://curia.europa.eu
+      type: court_database
+      coverage:
+        temporal:
+          from: "1954"
+          to: present
+        content:
+          - All CJEU case law
+          - Press releases
+          - Pending cases
+      formats:
+        - html
+        - pdf
+      access: open
+      priority: p0
+      job_id: eu/curia
+      notes: Official CJEU portal, most current decisions
+
+identifiers:
+  legislation:
+    primary_scheme: CELEX
+    patterns:
+      - name: CELEX Number
+        regex: "^[0-9]{5}[A-Z]{1,2}[0-9]{4}(\\([0-9]{2}\\))?$"
+        example: "32016R0679"
+        description: |
+          Format: SYYYYTNNNN
+          S = Sector (3=secondary law)
+          YYYY = Year
+          T = Type (R=Regulation, L=Directive, D=Decision)
+          NNNN = Number
+
+      - name: ELI (European Legislation Identifier)
+        regex: "^http://data\\.europa\\.eu/eli/.*$"
+        example: "http://data.europa.eu/eli/reg/2016/679/oj"
+
+  case_law:
+    ecli_support: true
+    ecli_country_code: EU
+    national_schemes:
+      - name: ECLI
+        pattern: "ECLI:EU:[CTF]:[0-9]{4}:[0-9]+"
+        example: "ECLI:EU:C:2014:317"
+        description: |
+          Court codes: C=Court of Justice, T=General Court, F=Civil Service Tribunal
+      - name: Case Number
+        pattern: "C-[0-9]+/[0-9]{2}"
+        example: "C-131/12"
+        description: Traditional case numbering
+
+coverage_plan:
+  p80_legislation:
+    strategy: |
+      Focus on currently in-force EU secondary law via EUR-Lex consolidated texts.
+      Start with Regulations (directly applicable) and major Directives.
+      Use CELEX identifiers as canonical keys.
+    targets:
+      - source_ref: EUR-Lex
+        scope: In-force Regulations (sector 3, type R)
+        estimated_docs: 12000
+        priority: p0
+        status: planned
+      - source_ref: EUR-Lex
+        scope: In-force Directives (sector 3, type L)
+        estimated_docs: 2000
+        priority: p0
+        status: planned
+      - source_ref: EUR-Lex
+        scope: In-force Decisions (sector 3, type D)
+        estimated_docs: 5000
+        priority: p1
+        status: planned
+
+  p80_case_law:
+    strategy: |
+      Start with Court of Justice (ECJ) and General Court decisions.
+      ECLI identifiers are authoritative. Full text available via EUR-Lex and CURIA.
+      Focus on judgments first, then AG opinions.
+    targets:
+      - source_ref: CURIA
+        scope: ECJ Judgments (all years)
+        estimated_docs: 15000
+        priority: p0
+        status: planned
+      - source_ref: CURIA
+        scope: General Court Judgments
+        estimated_docs: 8000
+        priority: p0
+        status: planned
+      - source_ref: EUR-Lex Case Law
+        scope: Advocate General Opinions
+        estimated_docs: 12000
+        priority: p1
+        status: planned
+
+  backlog:
+    - id: eu-treaties
+      description: Index all EU Treaties and amendments
+      type: legislation
+      priority: p1
+      status: planned
+    - id: eu-preparatory
+      description: Crawl preparatory acts (COM documents, proposals)
+      type: legislation
+      depends_on: [eu-treaties]
+      priority: p2
+      status: planned
+    - id: eu-international
+      description: International agreements to which EU is party
+      type: legislation
+      priority: p2
+      status: planned
+    - id: eu-orders
+      description: Court orders and procedural decisions
+      type: case_law
+      depends_on: []
+      priority: p2
+      status: planned
+    - id: eu-pending
+      description: Track pending cases from CURIA
+      type: case_law
+      priority: p2
+      status: planned
+
+access:
+  model: open
+  rate_limits:
+    requests_per_second: 1
+    requests_per_day: null
+    notes: Be respectful; no hard limits but throttling may occur
+  robots_txt:
+    allows_crawling: true
+    disallowed_paths: []
+  api_available: true
+  bulk_download: true
+  notes: |
+    EUR-Lex provides excellent programmatic access.
+    REST API requires free registration.
+    Bulk downloads available via EU Open Data Portal.
+    SPARQL endpoint available for CELLAR.
+
+metadata:
+  last_updated: "2025-01-21"
+  maintainer: LegalDataFactory
+  status: active
+  notes: |
+    EU is the anchor jurisdiction - all member state configs reference EU law.
+    CELEX and ECLI are the canonical identifier schemes.

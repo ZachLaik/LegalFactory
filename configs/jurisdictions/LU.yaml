@@ -1,0 +1,145 @@
+# Luxembourg (Lëtzebuerg) - Unitary Constitutional Monarchy
+
+jurisdiction:
+  iso_code: LU
+  name:
+    en: Luxembourg
+    native: Lëtzebuerg / Luxembourg / Luxemburg
+  eu_member_since: "1958-01-01"  # Founding member
+  languages:
+    - lb  # Luxembourgish
+    - fr  # French (legislation)
+    - de  # German
+
+legal_system:
+  type: unitary
+  hierarchy:
+    levels:
+      - name: National
+        code: national
+
+  court_structure:
+    constitutional:
+      - name:
+          en: Constitutional Court
+          native: Cour constitutionnelle
+        code: CC
+        ecli_code: LU:CC
+        level: constitutional
+        jurisdiction_scope: national
+
+    supreme:
+      - name:
+          en: Superior Court of Justice
+          native: Cour supérieure de Justice
+        code: CSJ
+        ecli_code: LU:CSJ
+        level: supreme
+        jurisdiction_scope: national
+      - name:
+          en: Administrative Court
+          native: Cour administrative
+        code: CA
+        ecli_code: LU:CA
+        level: supreme
+        jurisdiction_scope: national
+
+sources:
+  legislation:
+    - name: Legilux
+      url: https://legilux.public.lu
+      type: consolidated_legislation
+      coverage:
+        temporal:
+          from: "1814"
+          to: present
+        content:
+          - All legislation
+          - Memorial (official gazette)
+          - Consolidated texts
+      formats:
+        - html
+        - pdf
+        - xml
+      access: open
+      priority: p0
+      job_id: lu/legilux
+      notes: Excellent official portal
+
+    - name: N-Lex Luxembourg
+      url: https://n-lex.europa.eu/n-lex/pays.html?lang=en&pays=LU
+      type: n_lex_gateway
+      access: open
+      priority: p2
+
+  case_law:
+    - name: JurisLux
+      url: https://justice.public.lu
+      type: case_law_portal
+      coverage:
+        temporal:
+          from: varies
+          to: present
+      formats:
+        - html
+        - pdf
+      access: open
+      priority: p0
+      job_id: lu/jurislux
+
+    - name: ECLI Search - Luxembourg
+      url: https://e-justice.europa.eu/content_ecli_search_engine-430-lu-en.do
+      type: ecli_portal
+      access: open
+      priority: p1
+
+identifiers:
+  legislation:
+    primary_scheme: Memorial Reference
+    patterns:
+      - name: Memorial Reference
+        regex: "^Mém\\. [A-Z] [0-9]+/[0-9]{4}$"
+        example: "Mém. A 123/2020"
+
+  case_law:
+    ecli_support: true
+    ecli_country_code: LU
+
+coverage_plan:
+  p80_legislation:
+    strategy: Legilux is comprehensive
+    targets:
+      - source_ref: Legilux
+        scope: All consolidated legislation
+        estimated_docs: 5000
+        priority: p0
+        status: planned
+
+  p80_case_law:
+    strategy: Use JurisLux for court decisions
+    targets:
+      - source_ref: JurisLux
+        scope: Superior court decisions
+        estimated_docs: 10000
+        priority: p0
+        status: planned
+
+  backlog:
+    - id: lu-historical
+      description: Historical legislation
+      type: legislation
+      priority: p2
+      status: planned
+
+access:
+  model: open
+  rate_limits:
+    requests_per_second: 2
+  api_available: false
+  bulk_download: false
+  notes: Small jurisdiction with good data organization
+
+metadata:
+  last_updated: "2025-01-21"
+  maintainer: LegalDataFactory
+  status: active

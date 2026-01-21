@@ -1,0 +1,188 @@
+# Denmark (Danmark) - Unitary Constitutional Monarchy
+
+jurisdiction:
+  iso_code: DK
+  name:
+    en: Denmark
+    native: Danmark
+  eu_member_since: "1973-01-01"
+  languages:
+    - da
+
+legal_system:
+  type: unitary
+  hierarchy:
+    levels:
+      - name: National
+        code: national
+      - name: Autonomous territories
+        code: autonomous
+        subdivisions:
+          - name: Faroe Islands
+            code: FO
+            notes: Not part of EU
+          - name: Greenland
+            code: GL
+            notes: Not part of EU
+
+  court_structure:
+    supreme:
+      - name:
+          en: Supreme Court
+          native: Højesteret
+        code: HR
+        ecli_code: DK:HR
+        level: supreme
+        jurisdiction_scope: national
+
+    appellate:
+      - name:
+          en: High Courts
+          native: Landsretterne
+        code: LR
+        level: appellate
+        jurisdiction_scope: regional
+        notes: Western High Court (Vestre Landsret) and Eastern High Court (Østre Landsret)
+
+sources:
+  legislation:
+    - name: Retsinformation
+      url: https://www.retsinformation.dk
+      type: consolidated_legislation
+      coverage:
+        temporal:
+          from: "1985"
+          to: present
+        content:
+          - All Danish legislation
+          - Consolidated texts
+          - Historical versions
+      formats:
+        - html
+        - xml
+      access: open
+      priority: p0
+      job_id: dk/retsinformation
+      notes: Excellent official database with API
+
+    - name: Lovtidende (Law Gazette)
+      url: https://www.lovtidende.dk
+      type: official_gazette
+      coverage:
+        temporal:
+          from: "2008"
+          to: present
+      formats:
+        - html
+        - pdf
+      access: open
+      priority: p1
+      job_id: dk/lovtidende
+
+    - name: N-Lex Denmark
+      url: https://n-lex.europa.eu/n-lex/pays.html?lang=en&pays=DK
+      type: n_lex_gateway
+      access: open
+      priority: p2
+
+  case_law:
+    - name: Domsdatabasen
+      url: https://domsdatabasen.dk
+      type: case_law_portal
+      coverage:
+        temporal:
+          from: "2000"
+          to: present
+        content:
+          - Supreme Court
+          - High Courts
+          - Selected district court decisions
+      formats:
+        - html
+      access: registration
+      priority: p0
+      job_id: dk/domsdatabasen
+      notes: Free registration required
+
+    - name: Karnov Case Law
+      url: https://pro.karnovgroup.dk
+      type: case_law_portal
+      coverage:
+        temporal:
+          from: varies
+          to: present
+      formats:
+        - html
+      access: credentials
+      priority: p2
+      notes: Commercial database
+
+    - name: ECLI Search - Denmark
+      url: https://e-justice.europa.eu/content_ecli_search_engine-430-dk-en.do
+      type: ecli_portal
+      access: open
+      priority: p1
+
+identifiers:
+  legislation:
+    primary_scheme: LBK/LOV Number
+    patterns:
+      - name: Law Number
+        regex: "^(LBK|LOV) nr [0-9]+ af [0-9]{2}/[0-9]{2}/[0-9]{4}$"
+        example: "LBK nr 1284 af 14/11/2018"
+
+  case_law:
+    ecli_support: true
+    ecli_country_code: DK
+    national_schemes:
+      - name: Case Reference
+        pattern: "[0-9]+/[0-9]{4}"
+        example: "300/2020"
+
+coverage_plan:
+  p80_legislation:
+    strategy: Retsinformation is comprehensive official source
+    targets:
+      - source_ref: Retsinformation
+        scope: All consolidated legislation
+        estimated_docs: 15000
+        priority: p0
+        status: planned
+
+  p80_case_law:
+    strategy: Use Domsdatabasen with registration
+    targets:
+      - source_ref: Domsdatabasen
+        scope: Supreme Court and High Courts
+        estimated_docs: 30000
+        priority: p0
+        status: planned
+        blockers:
+          - requires_registration
+
+  backlog:
+    - id: dk-historical
+      description: Pre-1985 legislation
+      type: legislation
+      priority: p2
+      status: planned
+    - id: dk-faroe-greenland
+      description: Faroese and Greenlandic specific law
+      type: legislation
+      priority: p2
+      status: planned
+
+access:
+  model: partial
+  rate_limits:
+    requests_per_second: 2
+  api_available: true
+  bulk_download: false
+  notes: |
+    Retsinformation has good API.
+    Domsdatabasen requires free registration.
+
+metadata:
+  last_updated: "2025-01-21"
+  maintainer: LegalDataFactory
+  status: active

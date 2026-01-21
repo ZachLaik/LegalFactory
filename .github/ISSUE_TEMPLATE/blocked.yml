@@ -1,0 +1,88 @@
+name: Blocked Task
+description: Document a task that is blocked
+title: "[BLOCKED] <ISO>/<source>: <reason>"
+labels: ["blocked:unknown"]
+body:
+  - type: dropdown
+    id: country
+    attributes:
+      label: Country/Jurisdiction
+      options:
+        - EU (European Union)
+        - AT (Austria)
+        - BE (Belgium)
+        - BG (Bulgaria)
+        - CY (Cyprus)
+        - CZ (Czech Republic)
+        - DE (Germany)
+        - DK (Denmark)
+        - EE (Estonia)
+        - ES (Spain)
+        - FI (Finland)
+        - FR (France)
+        - GR (Greece)
+        - HR (Croatia)
+        - HU (Hungary)
+        - IE (Ireland)
+        - IT (Italy)
+        - LT (Lithuania)
+        - LU (Luxembourg)
+        - LV (Latvia)
+        - MT (Malta)
+        - NL (Netherlands)
+        - PL (Poland)
+        - PT (Portugal)
+        - RO (Romania)
+        - SE (Sweden)
+        - SI (Slovenia)
+        - SK (Slovakia)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: blocker_type
+    attributes:
+      label: Blocker Type
+      options:
+        - Credentials Required
+        - robots.txt Disallows
+        - Rate Limited
+        - Source Unavailable
+        - Technical Issue
+        - Unknown
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Blocker Description
+      description: Describe what is blocking progress
+    validations:
+      required: true
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence
+      description: Error logs, screenshots, or relevant output
+      placeholder: |
+        ```
+        Paste error logs or relevant output here
+        ```
+
+  - type: textarea
+    id: workaround
+    attributes:
+      label: Possible Workarounds
+      description: Any potential solutions or alternatives
+
+  - type: textarea
+    id: action_needed
+    attributes:
+      label: Action Needed
+      description: What human intervention is required?
+      placeholder: |
+        - [ ] Obtain API credentials
+        - [ ] Contact data provider
+        - [ ] Implement alternative approach

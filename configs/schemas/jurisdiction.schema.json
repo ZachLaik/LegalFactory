@@ -1,0 +1,363 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://legaldatafactory.dev/schemas/jurisdiction.json",
+  "title": "Jurisdiction Configuration",
+  "description": "Schema for EU jurisdiction coverage specification",
+  "type": "object",
+  "required": ["jurisdiction", "legal_system", "sources", "coverage_plan"],
+  "properties": {
+    "jurisdiction": {
+      "type": "object",
+      "required": ["iso_code", "name", "eu_member_since"],
+      "properties": {
+        "iso_code": {
+          "type": "string",
+          "pattern": "^[A-Z]{2}$",
+          "description": "ISO 3166-1 alpha-2 country code"
+        },
+        "name": {
+          "type": "object",
+          "required": ["en"],
+          "properties": {
+            "en": { "type": "string" },
+            "native": { "type": "string" }
+          }
+        },
+        "eu_member_since": {
+          "type": ["string", "null"],
+          "format": "date",
+          "description": "Date of EU membership (null for EU itself)"
+        },
+        "languages": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Official languages (ISO 639-1 codes)"
+        }
+      }
+    },
+    "legal_system": {
+      "type": "object",
+      "required": ["type", "hierarchy"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["unitary", "federal", "devolved", "supranational"],
+          "description": "Primary governmental structure"
+        },
+        "hierarchy": {
+          "type": "object",
+          "required": ["levels"],
+          "properties": {
+            "levels": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["name", "code"],
+                "properties": {
+                  "name": { "type": "string" },
+                  "code": { "type": "string" },
+                  "subdivisions": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "name": { "type": "string" },
+                        "code": { "type": "string" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "court_structure": {
+          "type": "object",
+          "properties": {
+            "constitutional": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/court" }
+            },
+            "supreme": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/court" }
+            },
+            "appellate": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/court" }
+            },
+            "administrative": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/court" }
+            },
+            "specialized": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/court" }
+            }
+          }
+        }
+      }
+    },
+    "sources": {
+      "type": "object",
+      "required": ["legislation", "case_law"],
+      "properties": {
+        "legislation": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/source" }
+        },
+        "case_law": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/source" }
+        }
+      }
+    },
+    "identifiers": {
+      "type": "object",
+      "properties": {
+        "legislation": {
+          "type": "object",
+          "properties": {
+            "primary_scheme": { "type": "string" },
+            "patterns": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "regex": { "type": "string" },
+                  "example": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "case_law": {
+          "type": "object",
+          "properties": {
+            "ecli_support": { "type": "boolean" },
+            "ecli_country_code": { "type": "string" },
+            "national_schemes": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string" },
+                  "pattern": { "type": "string" },
+                  "example": { "type": "string" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "coverage_plan": {
+      "type": "object",
+      "required": ["p80_legislation", "p80_case_law", "backlog"],
+      "properties": {
+        "p80_legislation": {
+          "type": "object",
+          "description": "80/20 plan for legislation - what yields most value fast",
+          "required": ["strategy", "targets"],
+          "properties": {
+            "strategy": { "type": "string" },
+            "targets": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/target" }
+            }
+          }
+        },
+        "p80_case_law": {
+          "type": "object",
+          "description": "80/20 plan for case law",
+          "required": ["strategy", "targets"],
+          "properties": {
+            "strategy": { "type": "string" },
+            "targets": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/target" }
+            }
+          }
+        },
+        "backlog": {
+          "type": "array",
+          "description": "Full to-do list for completeness",
+          "items": { "$ref": "#/$defs/backlog_item" }
+        }
+      }
+    },
+    "access": {
+      "type": "object",
+      "properties": {
+        "model": {
+          "type": "string",
+          "enum": ["open", "registration_required", "credentials_required", "blocked", "partial"]
+        },
+        "rate_limits": {
+          "type": "object",
+          "properties": {
+            "requests_per_second": { "type": "number" },
+            "requests_per_day": { "type": "integer" },
+            "notes": { "type": "string" }
+          }
+        },
+        "robots_txt": {
+          "type": "object",
+          "properties": {
+            "allows_crawling": { "type": "boolean" },
+            "disallowed_paths": {
+              "type": "array",
+              "items": { "type": "string" }
+            }
+          }
+        },
+        "api_available": { "type": "boolean" },
+        "bulk_download": { "type": "boolean" },
+        "notes": { "type": "string" }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "last_updated": { "type": "string", "format": "date" },
+        "maintainer": { "type": "string" },
+        "status": {
+          "type": "string",
+          "enum": ["draft", "review", "active", "deprecated"]
+        },
+        "notes": { "type": "string" }
+      }
+    }
+  },
+  "$defs": {
+    "court": {
+      "type": "object",
+      "required": ["name", "code"],
+      "properties": {
+        "name": {
+          "type": "object",
+          "properties": {
+            "en": { "type": "string" },
+            "native": { "type": "string" }
+          }
+        },
+        "code": { "type": "string" },
+        "level": { "type": "string" },
+        "jurisdiction_scope": {
+          "type": "string",
+          "enum": ["national", "regional", "local"]
+        },
+        "ecli_code": { "type": "string" }
+      }
+    },
+    "source": {
+      "type": "object",
+      "required": ["name", "url", "type"],
+      "properties": {
+        "name": { "type": "string" },
+        "url": { "type": "string", "format": "uri" },
+        "type": {
+          "type": "string",
+          "enum": [
+            "official_gazette",
+            "consolidated_legislation",
+            "legislation_portal",
+            "court_database",
+            "case_law_portal",
+            "n_lex_gateway",
+            "ecli_portal",
+            "api"
+          ]
+        },
+        "coverage": {
+          "type": "object",
+          "properties": {
+            "temporal": {
+              "type": "object",
+              "properties": {
+                "from": { "type": "string" },
+                "to": { "type": "string" },
+                "notes": { "type": "string" }
+              }
+            },
+            "content": {
+              "type": "array",
+              "items": { "type": "string" }
+            }
+          }
+        },
+        "formats": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["html", "pdf", "xml", "json", "docx", "akn"]
+          }
+        },
+        "access": {
+          "type": "string",
+          "enum": ["open", "registration", "credentials", "blocked"]
+        },
+        "priority": {
+          "type": "string",
+          "enum": ["p0", "p1", "p2"],
+          "description": "P0=critical 80/20, P1=important, P2=nice-to-have"
+        },
+        "job_id": {
+          "type": "string",
+          "description": "Reference to the scraper job for this source"
+        },
+        "notes": { "type": "string" }
+      }
+    },
+    "target": {
+      "type": "object",
+      "required": ["source_ref", "scope"],
+      "properties": {
+        "source_ref": {
+          "type": "string",
+          "description": "Reference to source name"
+        },
+        "scope": { "type": "string" },
+        "estimated_docs": { "type": "integer" },
+        "priority": {
+          "type": "string",
+          "enum": ["p0", "p1", "p2"]
+        },
+        "status": {
+          "type": "string",
+          "enum": ["planned", "in_progress", "done", "blocked"]
+        },
+        "blockers": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "backlog_item": {
+      "type": "object",
+      "required": ["id", "description", "type"],
+      "properties": {
+        "id": { "type": "string" },
+        "description": { "type": "string" },
+        "type": {
+          "type": "string",
+          "enum": ["legislation", "case_law", "infrastructure", "integration"]
+        },
+        "depends_on": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "priority": {
+          "type": "string",
+          "enum": ["p0", "p1", "p2"]
+        },
+        "status": {
+          "type": "string",
+          "enum": ["planned", "in_progress", "done", "blocked"]
+        },
+        "github_issue": { "type": "integer" }
+      }
+    }
+  }
+}

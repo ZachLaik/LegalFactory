@@ -1,0 +1,193 @@
+# Czech Republic (Česká republika) - Unitary Republic
+
+jurisdiction:
+  iso_code: CZ
+  name:
+    en: Czech Republic
+    native: Česká republika
+  eu_member_since: "2004-05-01"
+  languages:
+    - cs
+
+legal_system:
+  type: unitary
+  hierarchy:
+    levels:
+      - name: National
+        code: national
+
+  court_structure:
+    constitutional:
+      - name:
+          en: Constitutional Court
+          native: Ústavní soud
+        code: US
+        ecli_code: CZ:US
+        level: constitutional
+        jurisdiction_scope: national
+
+    supreme:
+      - name:
+          en: Supreme Court
+          native: Nejvyšší soud
+        code: NS
+        ecli_code: CZ:NS
+        level: supreme
+        jurisdiction_scope: national
+      - name:
+          en: Supreme Administrative Court
+          native: Nejvyšší správní soud
+        code: NSS
+        ecli_code: CZ:NSS
+        level: supreme
+        jurisdiction_scope: national
+
+    appellate:
+      - name:
+          en: High Courts
+          native: Vrchní soudy
+        code: VS
+        level: appellate
+        jurisdiction_scope: regional
+
+sources:
+  legislation:
+    - name: Zákony pro lidi (Laws for People)
+      url: https://www.zakonyprolidi.cz
+      type: consolidated_legislation
+      coverage:
+        temporal:
+          from: "1945"
+          to: present
+        content:
+          - All Czech legislation consolidated
+      formats:
+        - html
+      access: open
+      priority: p0
+      job_id: cz/zakonyprolidi
+
+    - name: Sbírka zákonů (Collection of Laws)
+      url: https://www.sbirka.cz
+      type: official_gazette
+      coverage:
+        temporal:
+          from: "1945"
+          to: present
+      formats:
+        - pdf
+      access: open
+      priority: p1
+      job_id: cz/sbirka
+
+    - name: N-Lex Czech Republic
+      url: https://n-lex.europa.eu/n-lex/pays.html?lang=en&pays=CZ
+      type: n_lex_gateway
+      access: open
+      priority: p2
+
+  case_law:
+    - name: Constitutional Court Decisions (NALUS)
+      url: https://nalus.usoud.cz
+      type: court_database
+      coverage:
+        temporal:
+          from: "1993"
+          to: present
+      formats:
+        - html
+      access: open
+      priority: p0
+      job_id: cz/nalus
+
+    - name: Supreme Court Database
+      url: https://www.nsoud.cz
+      type: court_database
+      coverage:
+        temporal:
+          from: varies
+          to: present
+      formats:
+        - html
+      access: open
+      priority: p0
+      job_id: cz/nsoud
+
+    - name: Supreme Administrative Court
+      url: https://www.nssoud.cz
+      type: court_database
+      coverage:
+        temporal:
+          from: "2003"
+          to: present
+      formats:
+        - html
+      access: open
+      priority: p0
+      job_id: cz/nssoud
+
+    - name: ECLI Search - Czech Republic
+      url: https://e-justice.europa.eu/content_ecli_search_engine-430-cz-en.do
+      type: ecli_portal
+      access: open
+      priority: p1
+
+identifiers:
+  legislation:
+    primary_scheme: Sb. Number
+    patterns:
+      - name: Collection Number
+        regex: "^[0-9]+/[0-9]{4} Sb\\.$"
+        example: "89/2012 Sb."
+
+  case_law:
+    ecli_support: true
+    ecli_country_code: CZ
+    national_schemes:
+      - name: Sp. zn. (File Number)
+        pattern: "[A-Za-z]+ [0-9]+/[0-9]+"
+        example: "Pl. ÚS 1/12"
+
+coverage_plan:
+  p80_legislation:
+    strategy: Zákony pro lidi has excellent consolidated coverage
+    targets:
+      - source_ref: Zákony pro lidi
+        scope: All consolidated legislation
+        estimated_docs: 8000
+        priority: p0
+        status: planned
+
+  p80_case_law:
+    strategy: Use official court databases
+    targets:
+      - source_ref: Constitutional Court Decisions (NALUS)
+        scope: All decisions
+        estimated_docs: 25000
+        priority: p0
+        status: planned
+      - source_ref: Supreme Court Database
+        scope: Published decisions
+        estimated_docs: 50000
+        priority: p0
+        status: planned
+
+  backlog:
+    - id: cz-lower-courts
+      description: Regional court decisions
+      type: case_law
+      priority: p2
+      status: planned
+
+access:
+  model: open
+  rate_limits:
+    requests_per_second: 2
+  api_available: false
+  bulk_download: false
+  notes: Good coverage, well-structured portals
+
+metadata:
+  last_updated: "2025-01-21"
+  maintainer: LegalDataFactory
+  status: active

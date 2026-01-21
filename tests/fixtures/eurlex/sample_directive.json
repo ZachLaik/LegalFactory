@@ -1,0 +1,34 @@
+{
+  "celex": "32019L1937",
+  "title": "Directive (EU) 2019/1937 of the European Parliament and of the Council of 23 October 2019 on the protection of persons who report breaches of Union law",
+  "eli": "http://data.europa.eu/eli/dir/2019/1937/oj",
+  "date_document": "2019-10-23",
+  "date_publication": "2019-11-26",
+  "date_entry_into_force": "2019-12-16",
+  "in_force": true,
+  "doc_type": "L",
+  "form": "Directive",
+  "author": ["European Parliament", "Council of the European Union"],
+  "subject_matters": [
+    "Protection of whistleblowers",
+    "Reporting of breaches"
+  ],
+  "directory_codes": [],
+  "eurovoc": [
+    "whistleblower",
+    "protection of witnesses",
+    "reporting"
+  ],
+  "legal_basis": [
+    "32012E/TXT"
+  ],
+  "expected_extracted": {
+    "jurisdiction": "EU",
+    "doc_type": "legislation",
+    "source_system": "eurlex",
+    "canonical_id": "32019L1937",
+    "title": "Directive (EU) 2019/1937 of the European Parliament and of the Council of 23 October 2019 on the protection of persons who report breaches of Union law",
+    "language": "en",
+    "in_force": true
+  }
+}

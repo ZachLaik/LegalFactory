@@ -1,0 +1,161 @@
+# Finland (Suomi / Finland) - Unitary Republic
+
+jurisdiction:
+  iso_code: FI
+  name:
+    en: Finland
+    native: Suomi
+  eu_member_since: "1995-01-01"
+  languages:
+    - fi  # Finnish
+    - sv  # Swedish
+
+legal_system:
+  type: unitary
+  hierarchy:
+    levels:
+      - name: National
+        code: national
+      - name: Åland Islands
+        code: aland
+        notes: Autonomous, Swedish-speaking region with legislative powers
+
+  court_structure:
+    supreme:
+      - name:
+          en: Supreme Court
+          native: Korkein oikeus / Högsta domstolen
+        code: KKO
+        ecli_code: FI:KKO
+        level: supreme
+        jurisdiction_scope: national
+      - name:
+          en: Supreme Administrative Court
+          native: Korkein hallinto-oikeus / Högsta förvaltningsdomstolen
+        code: KHO
+        ecli_code: FI:KHO
+        level: supreme
+        jurisdiction_scope: national
+
+    appellate:
+      - name:
+          en: Courts of Appeal
+          native: Hovioikeudet / Hovrätterna
+        code: HO
+        level: appellate
+        jurisdiction_scope: regional
+
+sources:
+  legislation:
+    - name: Finlex
+      url: https://www.finlex.fi
+      type: consolidated_legislation
+      coverage:
+        temporal:
+          from: "1987"
+          to: present
+        content:
+          - All Finnish legislation
+          - Consolidated texts
+          - Treaties
+          - Government proposals
+      formats:
+        - html
+        - xml
+      access: open
+      priority: p0
+      job_id: fi/finlex
+      notes: |
+        Excellent official database.
+        Bilingual (Finnish/Swedish).
+        Good XML structure.
+
+    - name: N-Lex Finland
+      url: https://n-lex.europa.eu/n-lex/pays.html?lang=en&pays=FI
+      type: n_lex_gateway
+      access: open
+      priority: p2
+
+  case_law:
+    - name: Finlex Oikeuskäytäntö
+      url: https://www.finlex.fi/fi/oikeus/
+      type: case_law_portal
+      coverage:
+        temporal:
+          from: varies
+          to: present
+        content:
+          - Supreme Court
+          - Supreme Administrative Court
+          - Courts of Appeal
+      formats:
+        - html
+      access: open
+      priority: p0
+      job_id: fi/finlex_caselaw
+
+    - name: ECLI Search - Finland
+      url: https://e-justice.europa.eu/content_ecli_search_engine-430-fi-en.do
+      type: ecli_portal
+      access: open
+      priority: p1
+
+identifiers:
+  legislation:
+    primary_scheme: SK Number
+    patterns:
+      - name: Statute Number
+        regex: "^[0-9]+/[0-9]{4}$"
+        example: "731/1999"
+
+  case_law:
+    ecli_support: true
+    ecli_country_code: FI
+    national_schemes:
+      - name: KKO Reference
+        pattern: "^KKO:[0-9]{4}:[0-9]+$"
+        example: "KKO:2020:1"
+
+coverage_plan:
+  p80_legislation:
+    strategy: Finlex is comprehensive
+    targets:
+      - source_ref: Finlex
+        scope: All consolidated legislation
+        estimated_docs: 10000
+        priority: p0
+        status: planned
+
+  p80_case_law:
+    strategy: Use Finlex case law section
+    targets:
+      - source_ref: Finlex Oikeuskäytäntö
+        scope: Supreme courts decisions
+        estimated_docs: 30000
+        priority: p0
+        status: planned
+
+  backlog:
+    - id: fi-aland
+      description: Åland Islands specific legislation
+      type: legislation
+      priority: p2
+      status: planned
+    - id: fi-lower-courts
+      description: District court decisions
+      type: case_law
+      priority: p2
+      status: planned
+
+access:
+  model: open
+  rate_limits:
+    requests_per_second: 2
+  api_available: false
+  bulk_download: false
+  notes: Bilingual content (Finnish/Swedish)
+
+metadata:
+  last_updated: "2025-01-21"
+  maintainer: LegalDataFactory
+  status: active

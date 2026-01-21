@@ -1,0 +1,158 @@
+# Lithuania (Lietuva) - Unitary Republic
+
+jurisdiction:
+  iso_code: LT
+  name:
+    en: Lithuania
+    native: Lietuva
+  eu_member_since: "2004-05-01"
+  languages:
+    - lt
+
+legal_system:
+  type: unitary
+  hierarchy:
+    levels:
+      - name: National
+        code: national
+
+  court_structure:
+    constitutional:
+      - name:
+          en: Constitutional Court
+          native: Konstitucinis Teismas
+        code: KT
+        ecli_code: LT:KT
+        level: constitutional
+        jurisdiction_scope: national
+
+    supreme:
+      - name:
+          en: Supreme Court
+          native: Lietuvos Aukščiausiasis Teismas
+        code: LAT
+        ecli_code: LT:LAT
+        level: supreme
+        jurisdiction_scope: national
+      - name:
+          en: Supreme Administrative Court
+          native: Lietuvos vyriausiasis administracinis teismas
+        code: LVAT
+        ecli_code: LT:LVAT
+        level: supreme
+        jurisdiction_scope: national
+
+sources:
+  legislation:
+    - name: e-TAR (Teisės aktų registras)
+      url: https://www.e-tar.lt
+      type: consolidated_legislation
+      coverage:
+        temporal:
+          from: "1990"
+          to: present
+        content:
+          - All Lithuanian legislation
+          - Consolidated texts
+      formats:
+        - html
+        - xml
+        - pdf
+      access: open
+      priority: p0
+      job_id: lt/etar
+      notes: Official legal acts register with API
+
+    - name: N-Lex Lithuania
+      url: https://n-lex.europa.eu/n-lex/pays.html?lang=en&pays=LT
+      type: n_lex_gateway
+      access: open
+      priority: p2
+
+  case_law:
+    - name: Infolex (Court Decisions)
+      url: https://liteko.teismai.lt/viesasprendimupaieska
+      type: case_law_portal
+      coverage:
+        temporal:
+          from: varies
+          to: present
+        content:
+          - All Lithuanian courts
+      formats:
+        - html
+        - pdf
+      access: open
+      priority: p0
+      job_id: lt/infolex
+
+    - name: Constitutional Court
+      url: https://www.lrkt.lt
+      type: court_database
+      coverage:
+        temporal:
+          from: "1993"
+          to: present
+      formats:
+        - html
+        - pdf
+      access: open
+      priority: p0
+      job_id: lt/lrkt
+
+    - name: ECLI Search - Lithuania
+      url: https://e-justice.europa.eu/content_ecli_search_engine-430-lt-en.do
+      type: ecli_portal
+      access: open
+      priority: p1
+
+identifiers:
+  legislation:
+    primary_scheme: TAR Number
+    patterns:
+      - name: TAR Reference
+        regex: "^TAR, [0-9]{4}-[0-9]{5}$"
+        example: "TAR, 2020-12345"
+
+  case_law:
+    ecli_support: true
+    ecli_country_code: LT
+
+coverage_plan:
+  p80_legislation:
+    strategy: e-TAR is comprehensive with API access
+    targets:
+      - source_ref: e-TAR
+        scope: All legislation
+        estimated_docs: 15000
+        priority: p0
+        status: planned
+
+  p80_case_law:
+    strategy: Use official court portal
+    targets:
+      - source_ref: Infolex
+        scope: Supreme court decisions
+        estimated_docs: 30000
+        priority: p0
+        status: planned
+
+  backlog:
+    - id: lt-lower-courts
+      description: District court decisions
+      type: case_law
+      priority: p2
+      status: planned
+
+access:
+  model: open
+  rate_limits:
+    requests_per_second: 2
+  api_available: true
+  bulk_download: false
+  notes: e-TAR has good API
+
+metadata:
+  last_updated: "2025-01-21"
+  maintainer: LegalDataFactory
+  status: active
