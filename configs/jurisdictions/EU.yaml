@@ -5,7 +5,7 @@ jurisdiction:
   iso_code: EU
   name:
     en: European Union
-    native: null  # Multiple official languages
+    native: European Union  # Multiple official languages, using EN as representative
   eu_member_since: null  # EU itself
   languages:
     - bg  # Bulgarian

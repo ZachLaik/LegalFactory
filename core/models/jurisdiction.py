@@ -60,13 +60,15 @@ class TaskStatus(str, Enum):
 class Source(BaseModel):
     """Data source configuration."""
 
+    model_config = {"extra": "ignore"}  # Ignore extra fields from YAML
+
     name: str
-    url: str
-    type: SourceType
+    url: str = ""
+    type: str = "legislation_portal"  # Allow any string, not just enum
     coverage: dict[str, Any] = Field(default_factory=dict)
     formats: list[str] = Field(default_factory=list)
     access: str = "open"
-    priority: Priority = Priority.P1
+    priority: str = "p1"  # Allow string instead of enum
     job_id: str | None = None
     notes: str | None = None
 

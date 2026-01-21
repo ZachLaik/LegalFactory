@@ -9,7 +9,6 @@ Usage:
 """
 
 from pathlib import Path
-from typing import Optional
 
 import typer
 from rich.console import Console
@@ -142,13 +141,13 @@ def init_db() -> None:
         console.print("[green]✓ Schema initialized successfully[/green]")
     except Exception as e:
         console.print(f"[red]✗ Error: {e}[/red]")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 @app.command()
 def run(
     job_id: str = typer.Argument(..., help="Job ID (e.g., eu/eurlex_legislation)"),
-    limit: Optional[int] = typer.Option(None, "--limit", "-l", help="Limit documents"),
+    limit: int | None = typer.Option(None, "--limit", "-l", help="Limit documents"),
     dry_run: bool = typer.Option(False, "--dry-run", "-n", help="Don't write to database"),
 ) -> None:
     """Run a specific scraper job."""
@@ -159,7 +158,7 @@ def run(
     # Parse job_id to get jurisdiction and source
     parts = job_id.split("/")
     if len(parts) != 2:
-        console.print(f"[red]Invalid job ID format. Expected: <iso>/<source>[/red]")
+        console.print("[red]Invalid job ID format. Expected: <iso>/<source>[/red]")
         raise typer.Exit(1)
 
     jurisdiction, source = parts
@@ -170,7 +169,7 @@ def run(
         console.print(f"[yellow]Warning: Job file {job_file} not found[/yellow]")
         console.print("Creating placeholder...")
 
-    console.print(f"\n[yellow]Job execution not yet implemented.[/yellow]")
+    console.print("\n[yellow]Job execution not yet implemented.[/yellow]")
     console.print("To implement this job, create:")
     console.print(f"  jobs/{jurisdiction}/{source}.py")
 
@@ -226,7 +225,7 @@ def controller(
         time.sleep(interval)
 
 
-def _find_next_task(jurisdictions: dict) -> Optional[str]:
+def _find_next_task(jurisdictions: dict) -> str | None:
     """Find the next task to execute based on priority.
 
     Returns job_id of next task, or None if no tasks available.
@@ -238,7 +237,7 @@ def _find_next_task(jurisdictions: dict) -> Optional[str]:
     # TODO: Check watermarks for incomplete jobs
 
     for priority in ["p0", "p1"]:
-        for iso_code, config in jurisdictions.items():
+        for _iso_code, config in jurisdictions.items():
             if config.coverage_plan:
                 # Check legislation targets
                 for target in config.coverage_plan.p80_legislation.get("targets", []):
@@ -273,48 +272,53 @@ def stats() -> None:
         from core.storage.database import Database
 
         db = Database()
-        stats = db.get_stats()
+        db_stats = db.get_stats()
 
         console.print("\n[bold]Database Statistics[/bold]\n")
 
         # Documents by jurisdiction
-        if stats["documents_by_jurisdiction"]:
+        if db_stats["documents_by_jurisdiction"]:
             table = Table(title="Documents by Jurisdiction")
             table.add_column("Jurisdiction", style="cyan")
             table.add_column("Type", style="yellow")
             table.add_column("Count", justify="right", style="green")
 
-            for row in stats["documents_by_jurisdiction"]:
+            for row in db_stats["documents_by_jurisdiction"]:
                 table.add_row(row["jurisdiction"], row["doc_type"], str(row["count"]))
 
             console.print(table)
 
-        console.print(f"\nTotal documents: {stats['total_documents']}")
-        console.print(f"Total texts: {stats['total_texts']}")
-        console.print(f"Total runs: {stats['total_runs']}")
+        console.print(f"\nTotal documents: {db_stats['total_documents']}")
+        console.print(f"Total texts: {db_stats['total_texts']}")
+        console.print(f"Total runs: {db_stats['total_runs']}")
 
         # Recent runs
-        if stats["recent_runs"]:
+        if db_stats["recent_runs"]:
             console.print("\n[bold]Recent Runs:[/bold]")
-            for run in stats["recent_runs"][:5]:
+            for recent_run in db_stats["recent_runs"][:5]:
                 status_color = (
-                    "green" if run["status"] == "completed" else
-                    "red" if run["status"] == "failed" else
+                    "green" if recent_run["status"] == "completed" else
+                    "red" if recent_run["status"] == "failed" else
                     "yellow"
                 )
                 console.print(
-                    f"  {run['job_id']}: [{status_color}]{run['status']}[/{status_color}] "
-                    f"(+{run['documents_created']} / -{run['documents_failed']})"
+                    f"  {recent_run['job_id']}: [{status_color}]{recent_run['status']}"
+                    f"[/{status_color}] "
+                    f"(+{recent_run['documents_created']} / -{recent_run['documents_failed']})"
                 )
 
     except Exception as e:
         console.print(f"[red]Error: {e}[/red]")
-        console.print("[yellow]Tip: Make sure DATABASE_URL is set and database is initialized[/yellow]")
+        console.print(
+            "[yellow]Tip: Make sure DATABASE_URL is set and database is initialized[/yellow]"
+        )
 
 
 @app.command("create-issues")
 def create_issues(
-    dry_run: bool = typer.Option(True, "--dry-run/--execute", help="Preview without creating"),
+    dry_run: bool = typer.Option(
+        True, "--dry-run/--execute", help="Preview without creating"
+    ),
 ) -> None:
     """Create GitHub issues from jurisdiction configs."""
     import os
@@ -337,14 +341,16 @@ def create_issues(
             for target in config.coverage_plan.p80_legislation.get("targets", []):
                 if target.get("priority") == "p0" and target.get("status") == "planned":
                     issue_count += 1
-                    title = f"[JOB] {iso_code}/{target.get('source_ref')}: Implement legislation scraper"
+                    source_ref = target.get("source_ref")
+                    title = f"[JOB] {iso_code}/{source_ref}: Implement legislation scraper"
                     console.print(f"  {issue_count}. {title}")
 
             # Create issues for P0 case law targets
             for target in config.coverage_plan.p80_case_law.get("targets", []):
                 if target.get("priority") == "p0" and target.get("status") == "planned":
                     issue_count += 1
-                    title = f"[JOB] {iso_code}/{target.get('source_ref')}: Implement case law scraper"
+                    source_ref = target.get("source_ref")
+                    title = f"[JOB] {iso_code}/{source_ref}: Implement case law scraper"
                     console.print(f"  {issue_count}. {title}")
 
     console.print(f"\nTotal issues to create: {issue_count}")
