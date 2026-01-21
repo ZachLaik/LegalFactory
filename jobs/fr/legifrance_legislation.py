@@ -51,8 +51,8 @@ Same as PISTE_CLIENT_ID - copy the Client Secret from your application settings.
     BASE_URL = "https://api.piste.gouv.fr/dila/legifrance/lf-engine-app"
     rate_limit_delay = 1.0
 
-    def __init__(self, *args, **kwargs) -> None:
-        super().__init__(*args, **kwargs)
+    def __init__(self, *args: object, **kwargs: object) -> None:
+        super().__init__(*args, **kwargs)  # type: ignore[arg-type]
         self._access_token: str | None = None
 
     def _get_access_token(self) -> str:

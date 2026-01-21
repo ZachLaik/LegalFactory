@@ -99,14 +99,13 @@ class BaseJob(ABC):
         )
 
         # Repositories
+        self.doc_repo: DocumentRepository | None = None
+        self.run_repo: RunRepository | None = None
+        self.watermark_repo: WatermarkRepository | None = None
         if db and not dry_run:
             self.doc_repo = DocumentRepository(db)
             self.run_repo = RunRepository(db)
             self.watermark_repo = WatermarkRepository(db)
-        else:
-            self.doc_repo = None
-            self.run_repo = None
-            self.watermark_repo = None
 
         # Run state
         self.run: Run | None = None

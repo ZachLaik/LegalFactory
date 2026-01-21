@@ -381,7 +381,7 @@ def controller(
         time.sleep(interval)
 
 
-def _find_next_task(jurisdictions: dict) -> str | None:
+def _find_next_task(jurisdictions: dict) -> str | None:  # type: ignore[type-arg]
     """Find the next task to execute based on priority.
 
     Returns job_id of next task, or None if no tasks available.
@@ -405,7 +405,7 @@ def _find_next_task(jurisdictions: dict) -> str | None:
                         source_ref = target.get("source_ref")
                         for source in config.legislation_sources:
                             if source.name == source_ref and source.job_id:
-                                return source.job_id
+                                return str(source.job_id)
 
                 # Check case law targets
                 for target in config.coverage_plan.p80_case_law.get("targets", []):
@@ -416,7 +416,7 @@ def _find_next_task(jurisdictions: dict) -> str | None:
                         source_ref = target.get("source_ref")
                         for source in config.case_law_sources:
                             if source.name == source_ref and source.job_id:
-                                return source.job_id
+                                return str(source.job_id)
 
     return None
 
