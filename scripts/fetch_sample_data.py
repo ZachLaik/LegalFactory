@@ -354,9 +354,9 @@ def save_to_csv(documents: list[dict], output_path: Path, doc_type: str) -> None
     logger.info(f"Saved {len(documents)} documents to {output_path}")
 
 
-def fetch_jurisdiction(jurisdiction: str, limit: int) -> None:
+def fetch_jurisdiction(jurisdiction: str, limit: int, base_dir: Path) -> None:
     """Fetch sample data for a specific jurisdiction."""
-    output_dir = SAMPLES_DIR / jurisdiction
+    output_dir = base_dir / jurisdiction
 
     if jurisdiction == "EU":
         legislation = fetch_eurlex_legislation(limit)
@@ -409,22 +409,20 @@ def main():
     )
 
     args = parser.parse_args()
-
-    global SAMPLES_DIR
-    SAMPLES_DIR = args.output_dir
+    output_dir = args.output_dir
 
     if args.all:
         for jurisdiction in ["EU", "FR"]:
-            fetch_jurisdiction(jurisdiction, args.limit)
+            fetch_jurisdiction(jurisdiction, args.limit, output_dir)
             time.sleep(2)  # Be respectful between jurisdictions
     elif args.jurisdiction:
-        fetch_jurisdiction(args.jurisdiction, args.limit)
+        fetch_jurisdiction(args.jurisdiction, args.limit, output_dir)
     else:
         parser.print_help()
         return
 
     # Create README
-    readme_path = SAMPLES_DIR / "README.md"
+    readme_path = output_dir / "README.md"
     readme_content = f"""# Sample Data
 
 Generated on {datetime.now().isoformat()[:10]} using `scripts/fetch_sample_data.py`.
