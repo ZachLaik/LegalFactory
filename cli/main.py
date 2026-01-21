@@ -271,6 +271,7 @@ def _create_credentials_issue(job_id: str, error: "MissingCredentialsError") -> 
 
     try:
         from github import Github
+        from github.GithubException import UnknownObjectException
 
         token = os.getenv("GITHUB_TOKEN")
         repo_name = os.getenv("GITHUB_REPOSITORY", "")
@@ -284,19 +285,40 @@ def _create_credentials_issue(job_id: str, error: "MissingCredentialsError") -> 
 
         # Check if issue already exists
         title = f"[BLOCKED] {job_id}: Missing credentials"
-        existing = list(repo.get_issues(state="open", labels=["blocked:credentials"]))
+        try:
+            existing = list(repo.get_issues(state="open", labels=["blocked:credentials"]))
+            for existing_issue in existing:
+                if existing_issue.title == title:
+                    console.print(f"[dim]Issue already exists: #{existing_issue.number}[/dim]")
+                    return
+        except Exception:
+            pass  # Label might not exist yet, continue to create issue
 
-        for issue in existing:
-            if issue.title == title:
-                console.print(f"[dim]Issue already exists: #{issue.number}[/dim]")
-                return
+        # Ensure labels exist
+        label_configs = [
+            ("blocked:credentials", "e99695", "Blocked: needs credentials/API key"),
+            ("human-needed", "d93f0b", "Requires human intervention"),
+        ]
+
+        labels_to_use = []
+        for label_name, color, description in label_configs:
+            try:
+                repo.get_label(label_name)
+                labels_to_use.append(label_name)
+            except UnknownObjectException:
+                try:
+                    repo.create_label(name=label_name, color=color, description=description)
+                    labels_to_use.append(label_name)
+                    console.print(f"[dim]Created label: {label_name}[/dim]")
+                except Exception:
+                    pass  # Couldn't create label, continue without it
 
         # Create new issue
         body = error.get_issue_body()
         issue = repo.create_issue(
             title=title,
             body=body,
-            labels=["blocked:credentials", "human-needed"],
+            labels=labels_to_use if labels_to_use else None,
         )
         console.print(f"[green]Created issue #{issue.number}[/green]")
 

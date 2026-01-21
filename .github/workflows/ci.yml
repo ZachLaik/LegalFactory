@@ -108,7 +108,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        job: [eu/eurlex_legislation]
+        job:
+          - eu/eurlex_legislation      # No required secrets - should pass
+          - fr/legifrance_legislation  # Requires PISTE credentials - will fail without them
     steps:
       - uses: actions/checkout@v4
 
@@ -122,30 +124,99 @@ jobs:
           python -m pip install --upgrade pip
           pip install -e ".[dev]"
 
-      - name: Test job with auto-retry
+      - name: Test job
         id: test_job
-        uses: nick-fields/retry@v3
+        continue-on-error: true  # Don't fail the whole workflow, we handle it below
         env:
           # Pass secrets from GitHub Secrets (if configured)
           EURLEX_API_KEY: ${{ secrets.EURLEX_API_KEY }}
           PISTE_CLIENT_ID: ${{ secrets.PISTE_CLIENT_ID }}
           PISTE_CLIENT_SECRET: ${{ secrets.PISTE_CLIENT_SECRET }}
-          # For automatic issue creation on missing credentials
-          CI: true
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: |
+          ldf run ${{ matrix.job }} --limit 5 --dry-run
+          echo "exit_code=$?" >> $GITHUB_OUTPUT
+
+      - name: Create issue for missing credentials
+        if: steps.test_job.outcome == 'failure'
+        uses: actions/github-script@v7
         with:
-          timeout_minutes: 10
-          max_attempts: 3
-          retry_wait_seconds: 30
-          # Don't retry if exit code is 78 (config error / missing credentials)
-          retry_on: error
-          command: |
-            ldf run ${{ matrix.job }} --limit 5 --dry-run
-            EXIT_CODE=$?
-            if [ $EXIT_CODE -eq 78 ]; then
-              echo "::error::Job ${{ matrix.job }} requires credentials that are not configured"
-              echo "Configure the required secrets in GitHub Settings > Secrets"
-              exit 78
-            fi
-            exit $EXIT_CODE
+          script: |
+            const job_id = '${{ matrix.job }}';
+            const title = `[BLOCKED] ${job_id}: Missing credentials`;
+
+            // Check if issue already exists
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'blocked:credentials'
+            });
+
+            const existingIssue = issues.data.find(i => i.title === title);
+            if (existingIssue) {
+              console.log(`Issue already exists: #${existingIssue.number}`);
+              return;
+            }
+
+            // Create the issue
+            const body = `## Credentials Required for \`${job_id}\`
+
+            This job requires credentials that are not currently configured.
+
+            ### How to fix
+
+            1. **Identify required credentials**: Run \`ldf secrets-template ${job_id}\` locally to see what's needed
+            2. **Obtain the credentials**: Follow the instructions in the template
+            3. **Add to GitHub Secrets**: Go to Settings > Secrets and variables > Actions
+            4. **Re-run the workflow**: The job should pass once credentials are configured
+
+            ### Labels
+            - \`blocked:credentials\` - This job is blocked until credentials are provided
+            - \`human-needed\` - Requires manual intervention
+
+            ---
+            *This issue was automatically created by CI.*
+            `;
+
+            // Ensure labels exist (create if needed)
+            const labelNames = ['blocked:credentials', 'human-needed'];
+            for (const labelName of labelNames) {
+              try {
+                await github.rest.issues.getLabel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  name: labelName
+                });
+              } catch (e) {
+                if (e.status === 404) {
+                  await github.rest.issues.createLabel({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    name: labelName,
+                    color: labelName === 'blocked:credentials' ? 'e99695' : 'd93f0b',
+                    description: labelName === 'blocked:credentials'
+                      ? 'Blocked: needs credentials/API key'
+                      : 'Requires human intervention'
+                  });
+                  console.log(`Created label: ${labelName}`);
+                }
+              }
+            }
+
+            const issue = await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: title,
+              body: body,
+              labels: labelNames
+            });
+
+            console.log(`Created issue #${issue.data.number}`);
+            core.setOutput('issue_number', issue.data.number);
+
+      - name: Fail if job failed (not due to missing credentials)
+        if: steps.test_job.outcome == 'failure'
+        run: |
+          echo "::error::Job ${{ matrix.job }} failed. Check the logs above."
+          echo "If this is a credentials issue, a GitHub issue has been created."
+          exit 1

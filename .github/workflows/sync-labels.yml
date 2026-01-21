@@ -5,7 +5,7 @@ on:
     branches: [main]
     paths:
       - '.github/labels.yml'
-  workflow_dispatch:
+  workflow_dispatch:  # Allow manual trigger
 
 jobs:
   sync:
