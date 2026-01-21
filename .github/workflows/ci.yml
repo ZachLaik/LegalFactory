@@ -171,15 +171,30 @@ jobs:
               labels: 'blocked:credentials'
             });
 
-            const existingIssue = issues.data.find(i => i.title === title);
-            if (existingIssue) {
-              console.log(`Issue already exists: #${existingIssue.number}`);
-              return;
-            }
-
             // Build URLs
             const secretsUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/settings/secrets/actions`;
             const workflowUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${run_id}`;
+
+            const existingIssue = issues.data.find(i => i.title === title);
+            if (existingIssue) {
+              // Add a comment with the new workflow run link
+              const comment = `### 🔄 Workflow re-run failed
+
+Still missing credentials. [View failed workflow run](${workflowUrl})
+
+Once you've added the credentials to [GitHub Secrets](${secretsUrl}), re-run the workflow.`;
+
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: existingIssue.number,
+                body: comment
+              });
+
+              console.log(`Added comment to existing issue #${existingIssue.number}`);
+              core.setOutput('issue_number', existingIssue.number);
+              return;
+            }
 
             // Create the issue
             const body = `## Credentials Required for \`${job_id}\`
