@@ -9,10 +9,14 @@ Usage:
 """
 
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import typer
 from rich.console import Console
 from rich.table import Table
+
+if TYPE_CHECKING:
+    from jobs.base import MissingCredentialsError
 
 app = typer.Typer(
     name="ldf",
@@ -265,7 +269,7 @@ def run(
         raise typer.Exit(1) from e
 
 
-def _create_credentials_issue(job_id: str, error: "MissingCredentialsError") -> None:  # noqa: F821
+def _create_credentials_issue(job_id: str, error: "MissingCredentialsError") -> None:
     """Create a GitHub issue for missing credentials."""
     import os
 
