@@ -1,1 +1,1 @@
-"""French job modules."""
+"""France data acquisition jobs."""

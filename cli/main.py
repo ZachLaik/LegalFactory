@@ -225,13 +225,83 @@ def run(
         console.print(f"[red]Import error: {e}[/red]")
         console.print("[yellow]Make sure all dependencies are installed: pip install -e '.[dev]'[/yellow]")
         raise typer.Exit(1) from e
+
     except Exception as e:
+        # Check if this is a missing credentials error
+        from jobs.base import MissingCredentialsError
+
+        if isinstance(e, MissingCredentialsError):
+            console.print("\n[red]BLOCKED: Missing required credentials[/red]")
+            console.print(f"\nJob [bold]{job_id}[/bold] requires the following credentials:\n")
+
+            for req in e.missing:
+                console.print(f"  [yellow]•[/yellow] [bold]{req.env_var}[/bold]")
+                console.print(f"    {req.description}")
+                console.print(f"    Required for: {req.required_for}")
+                console.print()
+
+            console.print("[bold]How to fix:[/bold]")
+            console.print("  1. Obtain the credentials (see instructions above)")
+            console.print("  2. Add them to .env.local for local testing")
+            console.print("  3. Add them as GitHub Secrets for CI")
+            console.print()
+            console.print(f"Run [cyan]ldf secrets-template {job_id}[/cyan] for a copy-paste template")
+
+            # In CI, create an issue automatically
+            import os
+
+            if os.getenv("CI") and os.getenv("GITHUB_TOKEN"):
+                console.print("\n[yellow]Creating GitHub issue for missing credentials...[/yellow]")
+                _create_credentials_issue(job_id, e)
+
+            # Exit with special code 78 (EX_CONFIG) to signal configuration error
+            raise typer.Exit(78) from e
+
         console.print(f"[red]Error running job: {e}[/red]")
         import traceback
 
         if dry_run:
             console.print("\n[dim]" + traceback.format_exc() + "[/dim]")
         raise typer.Exit(1) from e
+
+
+def _create_credentials_issue(job_id: str, error: "MissingCredentialsError") -> None:  # noqa: F821
+    """Create a GitHub issue for missing credentials."""
+    import os
+
+    try:
+        from github import Github
+
+        token = os.getenv("GITHUB_TOKEN")
+        repo_name = os.getenv("GITHUB_REPOSITORY", "")
+
+        if not token or not repo_name:
+            console.print("[yellow]Cannot create issue: GITHUB_TOKEN or GITHUB_REPOSITORY not set[/yellow]")
+            return
+
+        g = Github(token)
+        repo = g.get_repo(repo_name)
+
+        # Check if issue already exists
+        title = f"[BLOCKED] {job_id}: Missing credentials"
+        existing = list(repo.get_issues(state="open", labels=["blocked:credentials"]))
+
+        for issue in existing:
+            if issue.title == title:
+                console.print(f"[dim]Issue already exists: #{issue.number}[/dim]")
+                return
+
+        # Create new issue
+        body = error.get_issue_body()
+        issue = repo.create_issue(
+            title=title,
+            body=body,
+            labels=["blocked:credentials", "human-needed"],
+        )
+        console.print(f"[green]Created issue #{issue.number}[/green]")
+
+    except Exception as e:
+        console.print(f"[yellow]Failed to create issue: {e}[/yellow]")
 
 
 @app.command()

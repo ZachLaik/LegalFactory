@@ -98,9 +98,12 @@ jobs:
               print(f'\nAll configs valid')
           "
 
-  # Test scrapers in dry-run mode (no database required)
-  # Auto-retries up to 3 times on failure
-  test-scrapers:
+  # Test data acquisition jobs in dry-run mode
+  # Jobs that don't require secrets will pass
+  # Jobs that require secrets will:
+  #   1. Pass if secrets are configured in GitHub Secrets
+  #   2. Fail with exit code 78 and create an issue if secrets are missing
+  test-jobs:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -119,10 +122,30 @@ jobs:
           python -m pip install --upgrade pip
           pip install -e ".[dev]"
 
-      - name: Test scraper with auto-retry
+      - name: Test job with auto-retry
+        id: test_job
         uses: nick-fields/retry@v3
+        env:
+          # Pass secrets from GitHub Secrets (if configured)
+          EURLEX_API_KEY: ${{ secrets.EURLEX_API_KEY }}
+          PISTE_CLIENT_ID: ${{ secrets.PISTE_CLIENT_ID }}
+          PISTE_CLIENT_SECRET: ${{ secrets.PISTE_CLIENT_SECRET }}
+          # For automatic issue creation on missing credentials
+          CI: true
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
         with:
           timeout_minutes: 10
           max_attempts: 3
           retry_wait_seconds: 30
-          command: ldf run ${{ matrix.job }} --limit 5 --dry-run
+          # Don't retry if exit code is 78 (config error / missing credentials)
+          retry_on: error
+          command: |
+            ldf run ${{ matrix.job }} --limit 5 --dry-run
+            EXIT_CODE=$?
+            if [ $EXIT_CODE -eq 78 ]; then
+              echo "::error::Job ${{ matrix.job }} requires credentials that are not configured"
+              echo "Configure the required secrets in GitHub Settings > Secrets"
+              exit 78
+            fi
+            exit $EXIT_CODE

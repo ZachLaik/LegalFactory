@@ -126,22 +126,20 @@ class BaseJob(ABC):
     def validate_credentials(self) -> SecretValidationResult:
         """Validate that all required credentials are available.
 
+        Required secrets MUST be present - the job cannot run without them.
+        This applies to both dry-run and real mode, because we need to verify
+        the job actually works before it can be committed to main.
+
         Returns:
             Validation result
 
         Raises:
-            MissingCredentialsError: If required secrets are missing and not dry_run
+            MissingCredentialsError: If required secrets are missing
         """
         result = validate_secrets(self.job_id)
 
-        # In dry run mode, we just warn about missing credentials
-        if self.dry_run and result.missing:
-            print(f"[DRY RUN] Warning: Missing credentials: {[r.env_var for r in result.missing]}")
-            return result
-
-        # In real mode, missing credentials is an error
-        if result.missing:
-            # Filter to only required (not optional) secrets
+        # Check if any REQUIRED secrets are missing
+        if result.missing and self.required_secrets:
             required_missing = [
                 r for r in result.missing
                 if any(req.env_var == r.env_var for req in self.required_secrets)
@@ -150,6 +148,11 @@ class BaseJob(ABC):
             if required_missing:
                 result.missing = required_missing
                 raise MissingCredentialsError(self.job_id, result)
+
+        # Optional secrets just get a warning
+        if result.missing:
+            optional_missing = [r.env_var for r in result.missing]
+            print(f"Note: Optional credentials not set: {optional_missing}")
 
         self._secrets_validated = True
         return result
