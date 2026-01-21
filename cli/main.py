@@ -150,7 +150,7 @@ def run(
     limit: int | None = typer.Option(None, "--limit", "-l", help="Limit documents"),
     dry_run: bool = typer.Option(False, "--dry-run", "-n", help="Don't write to database"),
 ) -> None:
-    """Run a specific scraper job."""
+    """Run a specific data acquisition job."""
     console.print(f"\n[bold]Running job: {job_id}[/bold]")
     console.print(f"  Limit: {limit or 'none'}")
     console.print(f"  Dry run: {dry_run}")
@@ -166,12 +166,72 @@ def run(
     # Check if job file exists
     job_file = Path(f"jobs/{jurisdiction}/{source}.py")
     if not job_file.exists():
-        console.print(f"[yellow]Warning: Job file {job_file} not found[/yellow]")
-        console.print("Creating placeholder...")
+        console.print(f"[red]Error: Job file {job_file} not found[/red]")
+        console.print("\nTo create this job, add:")
+        console.print(f"  jobs/{jurisdiction}/{source}.py")
+        raise typer.Exit(1)
 
-    console.print("\n[yellow]Job execution not yet implemented.[/yellow]")
-    console.print("To implement this job, create:")
-    console.print(f"  jobs/{jurisdiction}/{source}.py")
+    # Dynamically import and run the job
+    try:
+        import importlib.util
+
+        spec = importlib.util.spec_from_file_location(f"jobs.{jurisdiction}.{source}", job_file)
+        if spec is None or spec.loader is None:
+            console.print(f"[red]Error: Could not load job module from {job_file}[/red]")
+            raise typer.Exit(1)
+
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+
+        # Find the job class (look for subclass of BaseJob)
+        from jobs.base import BaseJob
+
+        job_class = None
+        for attr_name in dir(module):
+            attr = getattr(module, attr_name)
+            if (
+                isinstance(attr, type)
+                and issubclass(attr, BaseJob)
+                and attr is not BaseJob
+                and hasattr(attr, "job_id")
+            ):
+                job_class = attr
+                break
+
+        if job_class is None:
+            console.print(f"[red]Error: No job class found in {job_file}[/red]")
+            console.print("Job file must contain a class that inherits from BaseJob")
+            raise typer.Exit(1)
+
+        # Initialize and run the job
+        console.print(f"\n[cyan]Executing {job_class.__name__}...[/cyan]\n")
+
+        job_instance = job_class(db=None, limit=limit, dry_run=dry_run)
+        result = job_instance.execute()
+
+        # Show results
+        console.print(f"\n[bold]Run completed: {result.status.value}[/bold]")
+        console.print(f"  Documents fetched: {result.documents_fetched}")
+        console.print(f"  Documents created: {result.documents_created}")
+        console.print(f"  Documents updated: {result.documents_updated}")
+        console.print(f"  Documents skipped: {result.documents_skipped}")
+        console.print(f"  Documents failed: {result.documents_failed}")
+
+        if result.error_message:
+            console.print(f"\n[red]Error: {result.error_message}[/red]")
+            raise typer.Exit(1)
+
+    except ImportError as e:
+        console.print(f"[red]Import error: {e}[/red]")
+        console.print("[yellow]Make sure all dependencies are installed: pip install -e '.[dev]'[/yellow]")
+        raise typer.Exit(1) from e
+    except Exception as e:
+        console.print(f"[red]Error running job: {e}[/red]")
+        import traceback
+
+        if dry_run:
+            console.print("\n[dim]" + traceback.format_exc() + "[/dim]")
+        raise typer.Exit(1) from e
 
 
 @app.command()
