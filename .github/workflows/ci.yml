@@ -193,25 +193,7 @@ jobs:
             }
 
             // Create the issue
-            const body = `## Credentials Required for \`${job_id}\`
-
-This job requires credentials that are not currently configured.
-
-### Required Credentials
-
-\`\`\`
-${secretsTemplate}
-\`\`\`
-
-### How to fix
-
-1. **Obtain the credentials**: Follow the instructions above to get the required API keys/secrets
-2. **Add to GitHub Secrets**: [Settings → Secrets and variables → Actions](${secretsUrl})
-3. **Re-run the workflow**: [Re-run this workflow](${workflowUrl}) once credentials are configured
-
----
-*This issue was automatically created by CI.*
-`;
+            const body = `## Credentials Required for \`${job_id}\`\n\nThis job requires credentials that are not currently configured.\n\n### Required Credentials\n\n\`\`\`\n${secretsTemplate}\n\`\`\`\n\n### How to fix\n\n1. **Obtain the credentials**: Follow the instructions above to get the required API keys/secrets\n2. **Add to GitHub Secrets**: [Settings → Secrets and variables → Actions](${secretsUrl})\n3. **Re-run the workflow**: [Re-run this workflow](${workflowUrl}) once credentials are configured\n\n---\n*This issue was automatically created by CI.*`;
 
             // Ensure labels exist (create if needed)
             const labelNames = ['blocked:credentials', 'human-needed'];
