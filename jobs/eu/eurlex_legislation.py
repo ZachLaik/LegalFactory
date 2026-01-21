@@ -6,8 +6,9 @@ Target: EU Regulations and Directives currently in force.
 """
 
 import uuid
+from collections.abc import Generator
 from datetime import date
-from typing import Any, Generator
+from typing import Any
 
 from bs4 import BeautifulSoup
 

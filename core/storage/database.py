@@ -1,8 +1,9 @@
 """Database connection and schema management for Neon Postgres."""
 
 import os
+from collections.abc import Generator
 from contextlib import contextmanager
-from typing import Any, Generator
+from typing import Any
 
 import psycopg
 from psycopg.rows import dict_row
@@ -260,10 +261,9 @@ class Database:
     @contextmanager
     def cursor(self) -> Generator[psycopg.Cursor[dict[str, Any]], None, None]:
         """Get a database cursor."""
-        with self.connection() as conn:
-            with conn.cursor() as cur:
-                yield cur
-                conn.commit()
+        with self.connection() as conn, conn.cursor() as cur:
+            yield cur
+            conn.commit()
 
     def init_schema(self) -> None:
         """Initialize database schema."""

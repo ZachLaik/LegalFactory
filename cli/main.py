@@ -359,5 +359,82 @@ def create_issues(
         console.print("\n[yellow]Dry run - no issues created. Use --execute to create.[/yellow]")
 
 
+@app.command("check-secrets")
+def check_secrets(
+    job_id: str | None = typer.Argument(None, help="Specific job to check (e.g., fr/legifrance_legislation)"),
+    create_issue: bool = typer.Option(False, "--create-issue", help="Create GitHub issue for missing secrets"),
+) -> None:
+    """Check secrets/credentials status for jobs.
+
+    Shows which secrets are configured and which are missing.
+    Can create GitHub issues to request credentials.
+    """
+    import os
+
+    from dotenv import load_dotenv
+
+    from core.secrets import SECRET_REGISTRY, validate_secrets
+
+    load_dotenv(".env.local")
+
+    console.print("\n[bold]Secrets Status Check[/bold]\n")
+
+    jobs_to_check = [job_id] if job_id else list(SECRET_REGISTRY.keys())
+
+    missing_any = False
+
+    for job_pattern in jobs_to_check:
+        result = validate_secrets(job_pattern)
+
+        if result.missing:
+            missing_any = True
+            console.print(f"[red]✗[/red] [bold]{job_pattern}[/bold] - Missing credentials:")
+            for req in result.missing:
+                console.print(f"    • {req.env_var}: {req.description}")
+        elif result.available:
+            console.print(f"[green]✓[/green] [bold]{job_pattern}[/bold] - All credentials available")
+        else:
+            console.print(f"[dim]○[/dim] [bold]{job_pattern}[/bold] - No credentials required")
+
+    if missing_any and create_issue:
+        if not os.getenv("GITHUB_TOKEN"):
+            console.print("\n[red]Cannot create issue: GITHUB_TOKEN not set[/red]")
+            raise typer.Exit(1)
+
+        console.print("\n[yellow]GitHub issue creation not yet implemented[/yellow]")
+        console.print("Would create issue with label: blocked:credentials, human-needed")
+
+    elif missing_any:
+        console.print("\n[yellow]Tip: Use --create-issue to create a GitHub issue for missing credentials[/yellow]")
+
+    console.print()
+
+
+@app.command("secrets-template")
+def secrets_template(
+    job_id: str = typer.Argument(..., help="Job ID to generate template for"),
+) -> None:
+    """Generate .env template for a job's required secrets.
+
+    Outputs environment variable declarations that can be added to .env.local
+    """
+    from core.secrets import get_requirements_for_job
+
+    requirements = get_requirements_for_job(job_id)
+
+    if not requirements:
+        console.print(f"[green]No secrets required for {job_id}[/green]")
+        return
+
+    console.print(f"# Secrets required for {job_id}")
+    console.print("# Add these to your .env.local file\n")
+
+    for req in requirements:
+        console.print(f"# {req.description}")
+        console.print(f"# How to obtain: {req.how_to_obtain.strip()}")
+        console.print(f"{req.env_var}=")
+        console.print()
+
+
 if __name__ == "__main__":
     app()

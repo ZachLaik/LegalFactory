@@ -1,11 +1,10 @@
 """Repository classes for database operations."""
 
 import json
-import uuid
 from datetime import datetime
 from typing import Any
 
-from core.models.document import Document, DocumentText, DocumentType
+from core.models.document import Document, DocumentType
 from core.models.run import Run, RunStatus, Watermark
 from core.storage.database import Database
 

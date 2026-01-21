@@ -1,21 +1,57 @@
-"""Base job class for all scrapers."""
+"""Base job class for all data acquisition jobs.
+
+Supports three acquisition methods:
+- Bulk downloads: One-time download of complete datasets
+- APIs: Incremental updates via REST/SPARQL endpoints
+- Scrapers: Web scraping as fallback when no API exists
+"""
 
 import uuid
 from abc import ABC, abstractmethod
+from collections.abc import Generator
 from datetime import datetime
-from typing import Any, Generator
+from typing import Any
 
 import httpx
 from tenacity import retry, stop_after_attempt, wait_exponential
 
 from core.models.document import Document, DocumentType
 from core.models.run import Run, RunStatus, Watermark
+from core.secrets import SecretRequirement, SecretValidationResult, validate_secrets
 from core.storage.database import Database
 from core.storage.repository import DocumentRepository, RunRepository, WatermarkRepository
 
 
+class MissingCredentialsError(Exception):
+    """Raised when a job is missing required credentials.
+
+    This error signals that human intervention is needed to provide
+    the necessary API keys or credentials.
+    """
+
+    def __init__(self, job_id: str, validation_result: SecretValidationResult):
+        self.job_id = job_id
+        self.validation_result = validation_result
+        self.missing = validation_result.missing
+
+        missing_vars = ", ".join(r.env_var for r in self.missing)
+        super().__init__(
+            f"Job {job_id} requires credentials: {missing_vars}. "
+            f"Run 'ldf check-secrets {job_id}' for details."
+        )
+
+    def get_issue_body(self) -> str:
+        """Generate GitHub issue body for this error."""
+        return self.validation_result.to_issue_body(self.job_id)
+
+
 class BaseJob(ABC):
-    """Base class for all scraper jobs.
+    """Base class for all data acquisition jobs.
+
+    Supports:
+    - Bulk downloads (preferred): Download complete datasets
+    - API access (preferred): Incremental updates via REST/SPARQL
+    - Web scraping (fallback): When no structured source exists
 
     Subclasses must implement:
     - job_id: Unique job identifier
@@ -33,6 +69,10 @@ class BaseJob(ABC):
     rate_limit_delay: float = 1.0  # Seconds between requests
     max_retries: int = 3
     timeout: float = 30.0
+
+    # Secret requirements - override in subclass if needed
+    required_secrets: list[SecretRequirement] = []
+    optional_secrets: list[SecretRequirement] = []
 
     def __init__(
         self,
@@ -79,12 +119,53 @@ class BaseJob(ABC):
         self.skipped = 0
         self.failed = 0
 
+        # Validate secrets (unless dry run)
+        self._secrets_validated = False
+        self._missing_credentials: SecretValidationResult | None = None
+
+    def validate_credentials(self) -> SecretValidationResult:
+        """Validate that all required credentials are available.
+
+        Returns:
+            Validation result
+
+        Raises:
+            MissingCredentialsError: If required secrets are missing and not dry_run
+        """
+        result = validate_secrets(self.job_id)
+
+        # In dry run mode, we just warn about missing credentials
+        if self.dry_run and result.missing:
+            print(f"[DRY RUN] Warning: Missing credentials: {[r.env_var for r in result.missing]}")
+            return result
+
+        # In real mode, missing credentials is an error
+        if result.missing:
+            # Filter to only required (not optional) secrets
+            required_missing = [
+                r for r in result.missing
+                if any(req.env_var == r.env_var for req in self.required_secrets)
+            ]
+
+            if required_missing:
+                result.missing = required_missing
+                raise MissingCredentialsError(self.job_id, result)
+
+        self._secrets_validated = True
+        return result
+
     def execute(self) -> Run:
         """Execute the job.
 
         Returns:
             Run record with execution results
+
+        Raises:
+            MissingCredentialsError: If required credentials are not configured
         """
+        # Validate credentials first
+        self.validate_credentials()
+
         # Create run record
         self.run = Run(
             id=str(uuid.uuid4()),
