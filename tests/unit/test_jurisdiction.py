@@ -1,7 +1,6 @@
 """Tests for jurisdiction configuration loading."""
 
 from pathlib import Path
-from tempfile import NamedTemporaryFile
 
 import pytest
 import yaml

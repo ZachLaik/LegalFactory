@@ -198,7 +198,7 @@
           "type": "object",
           "properties": {
             "requests_per_second": { "type": "number" },
-            "requests_per_day": { "type": "integer" },
+            "requests_per_day": { "type": ["integer", "null"] },
             "notes": { "type": "string" }
           }
         },
@@ -319,7 +319,7 @@
           "description": "Reference to source name"
         },
         "scope": { "type": "string" },
-        "estimated_docs": { "type": "integer" },
+        "estimated_docs": { "type": ["integer", "null"] },
         "priority": {
           "type": "string",
           "enum": ["p0", "p1", "p2"]

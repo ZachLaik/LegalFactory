@@ -2,10 +2,7 @@
 
 from datetime import date
 
-import pytest
-
 from core.models.document import Document, DocumentType
-from core.models.jurisdiction import JurisdictionConfig, LegalSystemType
 from core.models.run import Run, RunStatus, Watermark
 
 
