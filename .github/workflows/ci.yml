@@ -140,13 +140,28 @@ jobs:
           ldf run ${{ matrix.job }} --limit 5 --dry-run
           echo "exit_code=$?" >> $GITHUB_OUTPUT
 
+      - name: Get secrets template
+        id: secrets_template
+        if: steps.test_job.outcome == 'failure'
+        run: |
+          # Capture the secrets template output
+          template_output=$(ldf secrets-template ${{ matrix.job }} 2>&1 || true)
+          # Escape for GitHub Actions output (handle multiline)
+          echo "template<<EOF" >> $GITHUB_OUTPUT
+          echo "$template_output" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
       - name: Create issue for missing credentials
         if: steps.test_job.outcome == 'failure'
         uses: actions/github-script@v7
+        env:
+          SECRETS_TEMPLATE: ${{ steps.secrets_template.outputs.template }}
         with:
           script: |
             const job_id = '${{ matrix.job }}';
+            const run_id = '${{ github.run_id }}';
             const title = `[BLOCKED] ${job_id}: Missing credentials`;
+            const secretsTemplate = process.env.SECRETS_TEMPLATE || 'Unable to retrieve secrets template';
 
             // Check if issue already exists
             const issues = await github.rest.issues.listForRepo({
@@ -162,25 +177,30 @@ jobs:
               return;
             }
 
+            // Build URLs
+            const secretsUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/settings/secrets/actions`;
+            const workflowUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${run_id}`;
+
             // Create the issue
             const body = `## Credentials Required for \`${job_id}\`
 
-            This job requires credentials that are not currently configured.
+This job requires credentials that are not currently configured.
 
-            ### How to fix
+### Required Credentials
 
-            1. **Identify required credentials**: Run \`ldf secrets-template ${job_id}\` locally to see what's needed
-            2. **Obtain the credentials**: Follow the instructions in the template
-            3. **Add to GitHub Secrets**: Go to Settings > Secrets and variables > Actions
-            4. **Re-run the workflow**: The job should pass once credentials are configured
+\`\`\`
+${secretsTemplate}
+\`\`\`
 
-            ### Labels
-            - \`blocked:credentials\` - This job is blocked until credentials are provided
-            - \`human-needed\` - Requires manual intervention
+### How to fix
 
-            ---
-            *This issue was automatically created by CI.*
-            `;
+1. **Obtain the credentials**: Follow the instructions above to get the required API keys/secrets
+2. **Add to GitHub Secrets**: [Settings → Secrets and variables → Actions](${secretsUrl})
+3. **Re-run the workflow**: [Re-run this workflow](${workflowUrl}) once credentials are configured
+
+---
+*This issue was automatically created by CI.*
+`;
 
             // Ensure labels exist (create if needed)
             const labelNames = ['blocked:credentials', 'human-needed'];
