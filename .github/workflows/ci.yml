@@ -370,7 +370,7 @@ jobs:
 
       - name: Commit sample data
         run: |
-          git add data/samples/
+          git add -f data/samples/
           if git diff --staged --quiet; then
             echo "No changes to commit"
           else
