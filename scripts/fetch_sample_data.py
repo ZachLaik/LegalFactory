@@ -92,6 +92,8 @@ def fetch_eurlex_legislation(limit: int = 50) -> list[dict]:
                 if binding.get("subject")
                 else "",
                 "source_url": f"https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:{celex}",
+                "content_html_url": f"https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:{celex}",
+                "content_xml_url": f"https://eur-lex.europa.eu/legal-content/EN/TXT/XML/?uri=CELEX:{celex}",
             }
             documents.append(doc)
 
@@ -168,6 +170,8 @@ def fetch_eurlex_caselaw(limit: int = 50) -> list[dict]:
                 "decision_type": "Judgment",
                 "subject_matters": "",
                 "source_url": f"https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX:{celex}",
+                "content_html_url": f"https://eur-lex.europa.eu/legal-content/EN/TXT/HTML/?uri=CELEX:{celex}",
+                "content_xml_url": f"https://eur-lex.europa.eu/legal-content/EN/TXT/XML/?uri=CELEX:{celex}",
             }
             documents.append(doc)
 
@@ -227,21 +231,70 @@ def fetch_legifrance_legislation(limit: int = 50) -> list[dict]:
 
         documents = []
         for result in results.get("results", [])[:limit]:
+            # The API may nest data in 'titles' or other structures
+            # Try to extract from known structures
+            doc_id = ""
+            title = ""
+            date_text = ""
+            date_pub = ""
+            etat = ""
+
+            # Try direct fields first
+            if result.get("id"):
+                doc_id = result.get("id", "")
+                title = result.get("titre", "")
+                date_text = result.get("dateTexte", "")
+                date_pub = result.get("datePublication", "")
+                etat = result.get("etat", "")
+            # Try nested 'titles' structure (CODE_DATE response format)
+            elif result.get("titles"):
+                titles = result.get("titles", [{}])
+                if titles:
+                    first_title = titles[0] if isinstance(titles, list) else titles
+                    doc_id = first_title.get("id", "") or first_title.get("cid", "")
+                    title = first_title.get("titreLong", "") or first_title.get("titre", "")
+                    date_text = first_title.get("dateTexte", "")
+                    date_pub = first_title.get("datePubli", "")
+                    etat = first_title.get("etat", "")
+            # Try nested 'sections' structure
+            elif result.get("sections"):
+                sections = result.get("sections", [{}])
+                if sections:
+                    first_section = sections[0] if isinstance(sections, list) else sections
+                    doc_id = first_section.get("id", "")
+                    title = first_section.get("title", "") or first_section.get("titreLong", "")
+
+            # Skip if no ID found (malformed data)
+            if not doc_id:
+                logger.warning(f"Skipping result with no ID: {list(result.keys())[:5]}")
+                continue
+
             doc = {
-                "id": f"doc-fr-leg-{result.get('id', '')}",
+                "id": f"doc-fr-leg-{doc_id}",
                 "jurisdiction": "FR",
                 "doc_type": "legislation",
                 "source_system": "legifrance",
-                "canonical_id": result.get("id", ""),
-                "title": result.get("titre", ""),
+                "canonical_id": doc_id,
+                "title": title,
                 "language": "fr",
-                "date_document": result.get("dateTexte", ""),
-                "date_publication": result.get("datePublication", ""),
-                "in_force": result.get("etat", "") == "VIGUEUR",
+                "date_document": date_text[:10] if date_text else "",
+                "date_publication": date_pub[:10] if date_pub else "",
+                "in_force": etat == "VIGUEUR",
                 "subject_matters": "",
-                "source_url": f"https://www.legifrance.gouv.fr/codes/texte_lc/{result.get('id', '')}",
+                "source_url": f"https://www.legifrance.gouv.fr/codes/texte_lc/{doc_id}",
+                "content_html_url": f"https://www.legifrance.gouv.fr/codes/id/{doc_id}",
+                "content_xml_url": "",  # XML export requires API
             }
             documents.append(doc)
+
+        # If API returned data but we couldn't parse it, fall back to curated list
+        if not documents and results.get("results"):
+            logger.warning(
+                f"API returned {len(results.get('results', []))} results but couldn't parse them. "
+                f"Sample keys: {list(results.get('results', [{}])[0].keys()) if results.get('results') else 'none'}. "
+                "Falling back to curated list."
+            )
+            return _get_curated_french_legislation()
 
         logger.info(f"Fetched {len(documents)} French legislation documents")
         return documents
@@ -296,6 +349,8 @@ def _get_curated_french_legislation() -> list[dict]:
                 "in_force": True,
                 "subject_matters": "",
                 "source_url": f"https://www.legifrance.gouv.fr/codes/texte_lc/{legitext_id}",
+                "content_html_url": f"https://www.legifrance.gouv.fr/codes/id/{legitext_id}",
+                "content_xml_url": "",  # XML export requires API
             }
         )
 
@@ -327,6 +382,8 @@ def save_to_csv(documents: list[dict], output_path: Path, doc_type: str) -> None
             "in_force",
             "subject_matters",
             "source_url",
+            "content_html_url",
+            "content_xml_url",
         ]
     else:  # case_law
         fieldnames = [
@@ -344,6 +401,8 @@ def save_to_csv(documents: list[dict], output_path: Path, doc_type: str) -> None
             "decision_type",
             "subject_matters",
             "source_url",
+            "content_html_url",
+            "content_xml_url",
         ]
 
     with open(output_path, "w", newline="", encoding="utf-8") as f:
