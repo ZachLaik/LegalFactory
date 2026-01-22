@@ -248,12 +248,93 @@ jobs:
           echo "A GitHub issue has been created with instructions."
           exit 1
 
+      - name: Create issue for non-credentials error
+        if: steps.test_job.outcome == 'failure' && steps.test_job.outputs.is_credentials_error != 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const job_id = '${{ matrix.job }}';
+            const run_id = '${{ github.run_id }}';
+            const title = `[BUG] ${job_id}: Job failed`;
+            const workflowUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${run_id}`;
+
+            // Check if issue already exists
+            const issues = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'type:bug'
+            });
+
+            const existingIssue = issues.data.find(i => i.title === title);
+            if (existingIssue) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: existingIssue.number,
+                body: `### Workflow failed again\n\n[View failed workflow run](${workflowUrl})`
+              });
+              console.log(`Added comment to existing issue #${existingIssue.number}`);
+              return;
+            }
+
+            // Ensure labels exist
+            const labelNames = ['type:bug', 'agent:ready'];
+            for (const labelName of labelNames) {
+              try {
+                await github.rest.issues.getLabel({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  name: labelName
+                });
+              } catch (e) {
+                if (e.status === 404) {
+                  await github.rest.issues.createLabel({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    name: labelName,
+                    color: labelName === 'type:bug' ? 'd73a4a' : '0E8A16',
+                    description: labelName === 'type:bug'
+                      ? 'Something isn\'t working'
+                      : 'Ready for Claude agent to fix'
+                  });
+                }
+              }
+            }
+
+            const body = `## Job \`${job_id}\` Failed
+
+This job failed with a non-credentials error.
+
+### Error Details
+
+[View full logs](${workflowUrl})
+
+### For the Agent
+
+1. Check the workflow logs at the link above
+2. Find the root cause of the failure
+3. Fix the bug in the code
+4. Ensure \`ruff check .\` and \`mypy\` pass
+
+---
+*This issue was automatically created by CI and tagged for agent fix.*`;
+
+            const issue = await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: title,
+              body: body,
+              labels: labelNames
+            });
+
+            console.log(`Created issue #${issue.data.number} with agent:ready label`);
+
       - name: Fail if job failed (non-credentials error)
         if: steps.test_job.outcome == 'failure' && steps.test_job.outputs.is_credentials_error != 'true'
         run: |
           echo "::error::Job ${{ matrix.job }} failed with a non-credentials error."
-          echo "This is a real bug that needs to be fixed in the code."
-          echo "Check the logs above for details."
+          echo "An issue has been created with the agent:ready label."
           exit 1
 
   # Fetch sample data and commit to repo

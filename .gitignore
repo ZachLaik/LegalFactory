@@ -80,3 +80,4 @@ scratchpad/
 temp/
 output/
 data/
+!data/samples/
