@@ -302,23 +302,25 @@ jobs:
               }
             }
 
-            const body = `## Job \`${job_id}\` Failed
-
-This job failed with a non-credentials error.
-
-### Error Details
-
-[View full logs](${workflowUrl})
-
-### For the Agent
-
-1. Check the workflow logs at the link above
-2. Find the root cause of the failure
-3. Fix the bug in the code
-4. Ensure \`ruff check .\` and \`mypy\` pass
-
----
-*This issue was automatically created by CI and tagged for agent fix.*`;
+            const body = [
+              `## Job \`${job_id}\` Failed`,
+              '',
+              'This job failed with a non-credentials error.',
+              '',
+              '### Error Details',
+              '',
+              `[View full logs](${workflowUrl})`,
+              '',
+              '### For the Agent',
+              '',
+              '1. Check the workflow logs at the link above',
+              '2. Find the root cause of the failure',
+              '3. Fix the bug in the code',
+              '4. Ensure `ruff check .` and `mypy` pass',
+              '',
+              '---',
+              '*This issue was automatically created by CI and tagged for agent fix.*'
+            ].join('\n');
 
             const issue = await github.rest.issues.create({
               owner: context.repo.owner,
