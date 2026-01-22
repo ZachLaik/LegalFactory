@@ -1,0 +1,62 @@
+name: Auto-Fix Lint
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  auto-fix-lint:
+    runs-on: ubuntu-latest
+    if: github.event.workflow_run.conclusion == 'failure'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          ref: ${{ github.event.workflow_run.head_branch }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Check if lint failure
+        id: check
+        run: |
+          # Download the failed workflow logs
+          gh run view ${{ github.event.workflow_run.id }} --log-failed > /tmp/logs.txt 2>&1 || true
+
+          # Check if it was a ruff lint failure
+          if grep -q "ruff check" /tmp/logs.txt; then
+            echo "is_lint=true" >> $GITHUB_OUTPUT
+          else
+            echo "is_lint=false" >> $GITHUB_OUTPUT
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Auto-fix lint errors
+        if: steps.check.outputs.is_lint == 'true'
+        run: |
+          pip install ruff
+
+          # Run ruff fix (auto-fixable errors only)
+          ruff check . --fix || true
+
+          # Check if there are changes to commit
+          if [ -n "$(git status --porcelain)" ]; then
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git config user.name "github-actions[bot]"
+            git add .
+            git commit -m "Auto-fix lint errors (ruff --fix)
+
+          Co-Authored-By: github-actions[bot] <github-actions[bot]@users.noreply.github.com>"
+            git push
+            echo "Lint errors auto-fixed and pushed!"
+          else
+            echo "No auto-fixable lint errors found"
+          fi

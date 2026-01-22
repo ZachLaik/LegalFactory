@@ -1,0 +1,197 @@
+name: Agent Fix Issues
+
+on:
+  issues:
+    types: [labeled]
+  workflow_dispatch:
+    inputs:
+      issue_number:
+        description: 'Issue number to fix (optional)'
+        required: false
+        type: string
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+jobs:
+  agent-fix:
+    runs-on: ubuntu-latest
+    if: |
+      (github.event_name == 'issues' && github.event.label.name == 'agent:ready') ||
+      github.event_name == 'workflow_dispatch'
+    environment: Testing
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Check consecutive fix counter (10 max in 24h)
+        id: counter
+        run: |
+          # Count commits by github-actions bot in last 24 hours with "Fixes #" in message
+          COUNT=$(git log --oneline --author="github-actions" --since="24 hours ago" --grep="Fixes #" | wc -l | tr -d ' ')
+          echo "Agent has made $COUNT fixes in the last 24 hours"
+          echo "count=$COUNT" >> $GITHUB_OUTPUT
+
+          if [ "$COUNT" -ge 10 ]; then
+            echo "limit_reached=true" >> $GITHUB_OUTPUT
+            echo "::warning::Agent has reached 10 fix limit in 24 hours"
+          else
+            echo "limit_reached=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create human intervention issue if limit reached
+        if: steps.counter.outputs.limit_reached == 'true'
+        run: |
+          # Check if we already have an open human-needed issue
+          existing=$(gh issue list --label "human-needed" --state open --json number --jq 'length')
+
+          if [ "$existing" -eq 0 ]; then
+            gh issue create \
+              --title "[HUMAN NEEDED] Agent hit 10-fix limit in 24 hours" \
+              --label "human-needed" \
+              --body "The automated agent has made 10 consecutive fixes in the last 24 hours.
+
+          **Action Required:** Please review the recent agent commits and verify they are correct.
+
+          Once reviewed, you can:
+          1. Close this issue to reset the counter awareness
+          2. Manually trigger the agent workflow if more fixes are needed
+
+          Recent agent commits:
+          \`\`\`
+          $(git log --oneline --author="github-actions" --since="24 hours ago" -n 15)
+          \`\`\`"
+          fi
+          exit 0
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Get issue to fix
+        if: steps.counter.outputs.limit_reached != 'true'
+        id: issue
+        run: |
+          if [ -n "${{ inputs.issue_number }}" ]; then
+            # Manual trigger with specific issue
+            ISSUE_NUM="${{ inputs.issue_number }}"
+          else
+            # Get oldest agent:ready issue
+            ISSUE_NUM=$(gh issue list --label "agent:ready" --state open --json number --jq '.[0].number // empty')
+          fi
+
+          if [ -z "$ISSUE_NUM" ]; then
+            echo "No agent:ready issues found"
+            echo "has_issue=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          echo "has_issue=true" >> $GITHUB_OUTPUT
+          echo "number=$ISSUE_NUM" >> $GITHUB_OUTPUT
+
+          # Get issue details
+          gh issue view "$ISSUE_NUM" --json title,body > /tmp/issue.json
+          TITLE=$(jq -r '.title' /tmp/issue.json)
+          BODY=$(jq -r '.body' /tmp/issue.json)
+
+          echo "title=$TITLE" >> $GITHUB_OUTPUT
+
+          # Handle multiline body
+          echo "body<<EOF" >> $GITHUB_OUTPUT
+          echo "$BODY" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python
+        if: steps.issue.outputs.has_issue == 'true' && steps.counter.outputs.limit_reached != 'true'
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        if: steps.issue.outputs.has_issue == 'true' && steps.counter.outputs.limit_reached != 'true'
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Claude Sonnet Fix
+        if: steps.issue.outputs.has_issue == 'true' && steps.counter.outputs.limit_reached != 'true'
+        id: claude_fix
+        uses: anthropics/claude-code-action@beta
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          model: claude-sonnet-4-20250514
+          timeout_minutes: 10
+          prompt: |
+            Fix GitHub Issue #${{ steps.issue.outputs.number }}
+
+            **Title:** ${{ steps.issue.outputs.title }}
+
+            **Description:**
+            ${{ steps.issue.outputs.body }}
+
+            **Instructions:**
+            1. Analyze the error described in the issue
+            2. Find the root cause in the codebase
+            3. Implement a fix
+            4. Run `ruff check .` to ensure no lint errors
+            5. Run `mypy cli core jobs --ignore-missing-imports` to ensure no type errors
+            6. If tests exist for the affected code, run them
+            7. Commit the fix with message: "Fixes #${{ steps.issue.outputs.number }}: <brief description>"
+
+            **Important:**
+            - Make minimal, focused changes
+            - Don't refactor unrelated code
+            - If you can't fix it, explain why in your response
+
+      - name: Check if fix was successful
+        if: steps.issue.outputs.has_issue == 'true' && steps.counter.outputs.limit_reached != 'true'
+        id: check_fix
+        run: |
+          # Check if there are new commits
+          if git log --oneline -1 | grep -q "Fixes #${{ steps.issue.outputs.number }}"; then
+            echo "fixed=true" >> $GITHUB_OUTPUT
+
+            # Push the fix
+            git push
+            echo "Fix pushed successfully!"
+          else
+            echo "fixed=false" >> $GITHUB_OUTPUT
+            echo "No fix commit found"
+          fi
+
+      - name: Update issue on success
+        if: steps.check_fix.outputs.fixed == 'true'
+        run: |
+          # Remove agent:ready label
+          gh issue edit ${{ steps.issue.outputs.number }} --remove-label "agent:ready"
+
+          # Add comment
+          gh issue comment ${{ steps.issue.outputs.number }} --body "This issue has been automatically fixed by the Claude agent.
+
+          **Commit:** $(git rev-parse HEAD)
+
+          Please verify the fix is correct. If there are issues, reopen and add the \`agent:ready\` label to retry."
+
+          # Close the issue
+          gh issue close ${{ steps.issue.outputs.number }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update issue on failure
+        if: steps.issue.outputs.has_issue == 'true' && steps.check_fix.outputs.fixed != 'true' && steps.counter.outputs.limit_reached != 'true'
+        run: |
+          # Add comment about failure
+          gh issue comment ${{ steps.issue.outputs.number }} --body "The Claude agent attempted to fix this issue but was unable to commit a fix.
+
+          **Workflow run:** ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+          This may require human intervention. Adding \`human-needed\` label."
+
+          # Add human-needed label, keep agent:ready for potential retry
+          gh issue edit ${{ steps.issue.outputs.number }} --add-label "human-needed"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
